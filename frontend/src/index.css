@@ -573,6 +573,11 @@ a:hover {
   font-size: 0.85rem;
 }
 
+.text-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+}
+
 .divider {
   display: flex;
   align-items: center;
