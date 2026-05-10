@@ -1,0 +1,131 @@
+# Clean Graph
+
+A minimal conversational AI agent built with LangGraph, designed for agent scaffolding and playground, providing a practical starting point for learning, building, and experimenting with advanced agent technologies.
+
+[中文版](README_CN.md)
+
+## Prerequisites
+
+### Required Tools
+
+- **Python**: Programming language environment
+- **pip**: Python package manager
+- **Miniconda**: Lightweight conda environment manager
+- **VSCode**: Recommended development environment
+
+### Installation Guides
+
+- [Python for MacOS](https://www.python.org/downloads/macos/)
+- [Miniconda installation](https://www.anaconda.com/docs/getting-started/miniconda/install#macos-2)
+- [pip Installation](https://pip.pypa.io/en/stable/installation/#)
+- [Visual Studio Code on macOS](https://code.visualstudio.com/docs/setup/mac)
+
+## Quick Start
+
+### 1. Environment Setup
+
+Create a conda environment:
+
+```bash
+conda create -n clean_graph python=3.12
+conda activate clean_graph
+```
+
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Configure Environment
+
+Edit `.env` file with your configuration:
+
+```env
+# Required: LLM API Configuration (supports any OpenAI-compatible API)
+LLM_API_BASE=http://localhost:1234/v1  # LM Studio, Ollama, or other OpenAI-compatible API endpoint
+LLM_MODEL=qwen/qwen3-next-80b          # Your model name
+LLM_API_KEY=your-api-key-here          # API key for authentication
+
+# Optional: LangSmith Tracing
+LANGSMITH_TRACING=false                # Set to 'true' to enable
+LANGSMITH_API_KEY=your-langsmith-key   # Your LangSmith API key
+```
+
+### 4. Launch LangGraph Studio
+
+```bash
+langgraph dev --no-reload
+```
+
+Access the LangGraph Studio interface at `http://localhost:2024`.
+
+## Configuration
+
+### LLM Setup
+
+This project supports multiple LLM providers, with LM Studio recommended for local development:
+
+#### LM Studio Setup
+
+1. Download and install [LM Studio](https://lmstudio.ai/)
+2. Select and download suitable models in LM Studio
+3. Start the local server (typically at `http://localhost:1234`)
+
+#### LangSmith Registration
+
+For the best development experience, register for a LangSmith account:
+
+1. Visit [LangSmith](https://smith.langchain.com/) and create an account
+2. Get your API key
+3. Configure `LANGSMITH_API_KEY` in your `.env` file
+
+Note: Even when using local graphs with LangGraph Studio, you still need to register for a LangSmith Key (free) and have logged into LangSmith (as of November 2025).
+
+### Environment Variables
+
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `LLM_API_BASE` | Yes | Base URL for LLM API endpoint | - |
+| `LLM_MODEL` | Yes | Model name to use | - |
+| `LLM_API_KEY` | Yes | API key for authentication | - |
+| `LANGSMITH_TRACING` | No | Enable LangSmith tracing | `false` |
+| `LANGSMITH_API_KEY` | Yes | LangSmith API key | - |
+
+### Supported LLM Providers
+
+This project is compatible with any OpenAI-compatible API:
+
+- **Local LLMs**: LM Studio, Ollama, LocalAI
+- **Cloud Providers**: OpenAI, Together AI, Groq, etc.
+
+## Project Structure
+
+```
+clean_graph/
+├── src/
+│   ├── __init__.py      # Package initialization
+│   ├── graph.py         # Main LangGraph application logic
+│   └── llms.py          # LLM configuration and setup
+├── .env                 # Environment configuration
+├── langgraph.json       # LangGraph application definition
+├── requirements.txt     # Python dependencies
+├── README.md           # English documentation
+└── README_CN.md        # Chinese documentation
+```
+
+## Dependencies
+
+- `langchain~=1.0` - Core LangChain framework
+- `langgraph~=1.0` - Graph-based AI application framework
+- `langchain-core~=1.0` - Core LangChain components
+- `langchain_openai` - OpenAI API client
+- `python-dotenv~=1.0` - Environment variable management
+- `langgraph-checkpoint>=2.1.0` - State checkpointing
+- `langgraph-cli[inmem]` - Development tools (in-memory storage)
+- `pydantic~=2.0` - Data validation and settings management
+
+## References
+
+- [LangGraph Studio Doc](https://docs.langchain.com/oss/python/langgraph/studio)
+- [LangGraph Doc](https://docs.langchain.com/oss/python/langgraph/overview)
