@@ -3,8 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.routers import auth, pricing, stripe, contract, follow_up, stats, admin
+from app.middleware.logging import LoggingMiddleware
+from app.logger import setup_logging
 
 settings = get_settings()
+
+# Setup structured logging
+setup_logging()
 
 app = FastAPI(
     title=settings.app_name,
@@ -12,6 +17,9 @@ app = FastAPI(
     version="1.0.0",
     debug=settings.debug,
 )
+
+# Logging middleware
+app.add_middleware(LoggingMiddleware)
 
 # CORS
 app.add_middleware(
@@ -34,7 +42,36 @@ app.include_router(admin.router)
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "service": settings.app_name}
+    import redis
+    import psycopg2
+    from app.config import get_settings
+
+    settings = get_settings()
+    checks = {"api": True, "database": False, "redis": False}
+
+    # Check database
+    try:
+        conn = psycopg2.connect(settings.database_url.replace("+psycopg2", ""))
+        conn.close()
+        checks["database"] = True
+    except:
+        pass
+
+    # Check Redis
+    try:
+        r = redis.from_url(settings.redis_url)
+        r.ping()
+        checks["redis"] = True
+    except:
+        pass
+
+    all_ok = all(checks.values())
+    return {
+        "status": "ok" if all_ok else "degraded",
+        "service": settings.app_name,
+        "version": "1.0.0",
+        "checks": checks,
+    }
 
 
 @app.get("/")
