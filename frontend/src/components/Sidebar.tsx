@@ -1,17 +1,21 @@
 import { NavLink } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import ThemeToggle from './ThemeToggle'
+import LanguageSwitcher from './LanguageSwitcher'
 
 interface SidebarProps {
   onLogout: () => void
 }
 
 export default function Sidebar({ onLogout }: SidebarProps) {
+  const { t } = useTranslation()
+
   const menuItems = [
-    { path: '/', label: 'Review', icon: '📄' },
-    { path: '/compare', label: 'Compare', icon: '⚖️' },
-    { path: '/pricing', label: 'Pricing', icon: '💎' },
-    { path: '/contracts', label: 'My Contracts', icon: '📁' },
-    { path: '/settings', label: 'Settings', icon: '⚙️' },
+    { path: '/', label: t('nav.review'), icon: '📄' },
+    { path: '/compare', label: t('nav.compare'), icon: '⚖️' },
+    { path: '/pricing', label: t('nav.pricing'), icon: '💎' },
+    { path: '/contracts', label: t('nav.myContracts'), icon: '📁' },
+    { path: '/settings', label: t('nav.settings'), icon: '⚙️' },
   ]
 
   return (
@@ -40,16 +44,17 @@ export default function Sidebar({ onLogout }: SidebarProps) {
         <div className="sidebar-divider" />
         <div className="upgrade-card">
           <span className="upgrade-icon">💎</span>
-          <p className="upgrade-text">Upgrade to Pro</p>
-          <p className="upgrade-sub">Unlock more reviews</p>
+          <p className="upgrade-text">{t('pricing.upgrade')}</p>
+          <p className="upgrade-sub">{t('settings.upgradePrompt')}</p>
           <NavLink to="/pricing" className="btn btn-outline btn-sm">
-            View Plans
+            {t('pricing.getStarted')}
           </NavLink>
         </div>
         <div className="sidebar-actions">
+          <LanguageSwitcher />
           <ThemeToggle />
           <button className="btn btn-ghost btn-sm" onClick={onLogout}>
-            Sign Out
+            {t('auth.logout')}
           </button>
         </div>
       </div>
