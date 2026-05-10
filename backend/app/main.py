@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import auth, pricing, stripe, contract
+from app.routers import auth, pricing, stripe, contract, follow_up
 
 settings = get_settings()
 
@@ -27,6 +27,7 @@ app.include_router(auth.router)
 app.include_router(pricing.router)
 app.include_router(stripe.router)
 app.include_router(contract.router)
+app.include_router(follow_up.router)
 
 
 @app.get("/health")
