@@ -91,7 +91,8 @@ export default function Compare() {
     }
   }
 
-  const handleClick = async (which: 'old' | 'new') => {
+  const handleClick = async (e: React.MouseEvent, which: 'old' | 'new') => {
+    e.stopPropagation()
     if (!isLoggedIn) {
       setShowLogin(true)
       return
@@ -219,7 +220,7 @@ export default function Compare() {
           <div className="compare-uploads">
             <div
               className={`upload-zone ${oldFile ? 'has-file' : ''}`}
-              onClick={() => handleClick('old')}
+              onClick={(e) => handleClick(e, 'old')}
             >
               <input
                 ref={oldFileRef}
@@ -256,7 +257,7 @@ export default function Compare() {
 
             <div
               className={`upload-zone ${newFile ? 'has-file' : ''}`}
-              onClick={() => handleClick('new')}
+              onClick={(e) => handleClick(e, 'new')}
             >
               <input
                 ref={newFileRef}
@@ -317,7 +318,7 @@ export default function Compare() {
           <div className="compare-uploads">
             <div
               className={`upload-zone ${oldFile ? 'has-file' : ''}`}
-              onClick={() => handleClick('old')}
+              onClick={(e) => handleClick(e, 'old')}
             >
               <input
                 ref={oldFileRef}
@@ -354,7 +355,7 @@ export default function Compare() {
 
             <div
               className={`upload-zone ${newFile ? 'has-file' : ''}`}
-              onClick={() => handleClick('new')}
+              onClick={(e) => handleClick(e, 'new')}
             >
               <input
                 ref={newFileRef}

@@ -86,7 +86,8 @@ export default function Home() {
     }
   }, [isLoggedIn, setShowLogin, user])
 
-  const handleClick = async () => {
+  const handleClick = async (e?: React.MouseEvent) => {
+    e?.stopPropagation()
     if (!isLoggedIn) {
       setShowLogin(true)
       return
