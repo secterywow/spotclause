@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
 
@@ -28,7 +29,8 @@ interface PricingData {
 
 export default function Pricing() {
   const { t } = useTranslation()
-  const { isLoggedIn, user } = useAuth()
+  const navigate = useNavigate()
+  const { user } = useAuth()
   const [isYearly, setIsYearly] = useState(false)
   const [pricing, setPricing] = useState<PricingData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -120,23 +122,42 @@ export default function Pricing() {
                 <span className="feature-check">✓</span>
                 {t('pricing.compareContracts')}: {plan.features.compare}
               </li>
-              <li>
-                <span className={`feature-check ${plan.features.follow_up ? '' : 'disabled'}`}>
-                  {plan.features.follow_up ? '✓' : '×'}
-                </span>
-                {t('pricing.followUp')}
-              </li>
-              <li>
-                <span className={`feature-check ${plan.features.export ? '' : 'disabled'}`}>
-                  {plan.features.export ? '✓' : '×'}
-                </span>
-                {t('pricing.export')}
-              </li>
+              {key !== 'free' && (
+                <>
+                  <li>
+                    <span className="feature-check">✓</span>
+                    {t('pricing.followUp')}
+                  </li>
+                  <li>
+                    <span className="feature-check">✓</span>
+                    {t('pricing.exportFormats')}
+                  </li>
+                  <li>
+                    <span className="feature-check">✓</span>
+                    {t('pricing.negotiation')}
+                  </li>
+                  <li>
+                    <span className="feature-check">✓</span>
+                    {t('pricing.deadline')}
+                  </li>
+                  <li>
+                    <span className="feature-check">✓</span>
+                    {t('pricing.loophole')}
+                  </li>
+                  <li>
+                    <span className="feature-check">✓</span>
+                    {t('pricing.riskEdit')}
+                  </li>
+                </>
+              )}
             </ul>
 
             <button
               className={`btn ${popular ? 'btn-primary' : 'btn-secondary'}`}
-              disabled={key === 'free' || user?.plan === key}
+              disabled={user?.plan === key && key !== 'free'}
+              onClick={() => {
+                if (key === 'free') navigate('/')
+              }}
             >
               {key === 'free'
                 ? t('pricing.getStarted')

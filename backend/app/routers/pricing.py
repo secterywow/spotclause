@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db, SessionLocal
 from app.services.pricing import get_pricing_by_country, detect_country_from_ip, init_pricing_data
 from app.config import get_settings
 
@@ -9,9 +9,13 @@ router = APIRouter(prefix="/api/pricing", tags=["pricing"])
 
 
 @router.on_event("startup")
-def startup_init_pricing(db: Session = Depends(get_db)):
+def startup_init_pricing():
     """Initialize pricing data on startup."""
-    init_pricing_data(db)
+    db = SessionLocal()
+    try:
+        init_pricing_data(db)
+    finally:
+        db.close()
 
 
 @router.get("/detect")
@@ -34,10 +38,14 @@ def detect_pricing(request: Request, db: Session = Depends(get_db)):
                 "price_monthly": 0,
                 "price_yearly": 0,
                 "features": {
-                    "analyze": "1 lifetime (1MB limit)",
-                    "compare": "0",
+                    "analyze": "1",
+                    "compare": "1",
                     "follow_up": False,
-                    "export": True,
+                    "export": False,
+                    "negotiation": False,
+                    "deadline": False,
+                    "loophole": False,
+                    "risk_edit": False,
                 }
             },
             "standard": {
@@ -49,6 +57,10 @@ def detect_pricing(request: Request, db: Session = Depends(get_db)):
                     "compare": "10 per month",
                     "follow_up": True,
                     "export": True,
+                    "negotiation": True,
+                    "deadline": True,
+                    "loophole": True,
+                    "risk_edit": True,
                 }
             },
             "pro": {
@@ -60,6 +72,10 @@ def detect_pricing(request: Request, db: Session = Depends(get_db)):
                     "compare": "50 per month",
                     "follow_up": True,
                     "export": True,
+                    "negotiation": True,
+                    "deadline": True,
+                    "loophole": True,
+                    "risk_edit": True,
                 }
             }
         }

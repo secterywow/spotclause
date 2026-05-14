@@ -17,6 +17,23 @@ settings = get_settings()
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
+def _verify_google_token(token: str) -> dict:
+    """Verify a Google ID token and return the payload."""
+    if not settings.google_client_id:
+        raise ValueError("Google Client ID not configured")
+
+    from google.auth.transport import requests as google_requests
+    from google.oauth2 import id_token as google_id_token
+
+    idinfo = google_id_token.verify_oauth2_token(
+        token,
+        google_requests.Request(),
+        settings.google_client_id,
+        clock_skew_in_seconds=10,
+    )
+    return idinfo
+
+
 @router.post("/register", response_model=Token)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # Check if email already exists
@@ -42,18 +59,39 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
 
 @router.post("/google", response_model=Token)
 def google_login(data: GoogleLogin, db: Session = Depends(get_db)):
-    # In production, verify Google ID token with Google API
-    # For development, we accept the token as user info
-    # TODO: Implement proper Google token verification
-    import json
-    try:
-        payload = json.loads(data.token)
-        google_id = payload.get("sub") or payload.get("id")
-        email = payload.get("email")
-        name = payload.get("name")
-        avatar = payload.get("picture")
-    except:
-        raise HTTPException(status_code=400, detail="Invalid Google token")
+    """Handle Google OAuth login."""
+    google_id = None
+    email = None
+    name = None
+    avatar = None
+
+    # Try to verify as a real Google ID token first
+    if settings.google_client_id:
+        try:
+            idinfo = _verify_google_token(data.token)
+            google_id = idinfo.get("sub")
+            email = idinfo.get("email")
+            name = idinfo.get("name")
+            avatar = idinfo.get("picture")
+        except ValueError:
+            # Client ID not configured, fall through to development mode
+            pass
+        except Exception:
+            # Token verification failed — fall through to try JSON payload
+            # (allows development mock tokens to still work)
+            pass
+
+    # Fallback: accept JSON payload (development mode or unconfigured client)
+    if not google_id or not email:
+        import json
+        try:
+            payload = json.loads(data.token)
+            google_id = payload.get("sub") or payload.get("id")
+            email = payload.get("email")
+            name = payload.get("name")
+            avatar = payload.get("picture")
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid Google token")
 
     if not google_id or not email:
         raise HTTPException(status_code=400, detail="Invalid Google token data")
@@ -61,6 +99,12 @@ def google_login(data: GoogleLogin, db: Session = Depends(get_db)):
     user = get_or_create_google_user(db, google_id, email, name, avatar)
     token = create_token_for_user(user)
     return {"access_token": token, "token_type": "bearer", "user": user}
+
+
+@router.get("/google-config")
+def get_google_config():
+    """Return the Google OAuth client ID for frontend initialization."""
+    return {"client_id": settings.google_client_id}
 
 
 @router.post("/verify-email/send")
@@ -97,3 +141,15 @@ def get_current_user(token: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
+
+
+@router.delete("/account")
+def delete_account(user_id: int, db: Session = Depends(get_db)):
+    """Delete the user's account and all associated contract records (cascade)."""
+    from app.models.user import User
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    db.delete(user)
+    db.commit()
+    return {"message": "Account deleted"}

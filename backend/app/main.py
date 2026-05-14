@@ -22,9 +22,20 @@ app = FastAPI(
 app.add_middleware(LoggingMiddleware)
 
 # CORS
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://spotclause.app",
+    "https://www.spotclause.app",
+]
+# Allow Vercel preview deployments
+import os
+if os.environ.get("VERCEL_URL"):
+    origins.append(f"https://{os.environ['VERCEL_URL']}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

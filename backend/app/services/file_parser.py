@@ -19,6 +19,15 @@ ALLOWED_TYPES = {
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20MB
 MAX_FREE_FILE_SIZE = 1 * 1024 * 1024  # 1MB for free users
 
+# File magic byte signatures
+OLE_MAGIC = b'\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1'  # Office 97-2003 binary (.doc / .xls / .ppt)
+ZIP_MAGIC = b'PK\x03\x04'                          # Office 2007+ Open XML (.docx / .xlsx)
+
+
+def _looks_like_legacy_doc(file_data: bytes) -> bool:
+    """True for the old binary .doc format (OLE Compound Document)."""
+    return len(file_data) >= 8 and file_data[:8] == OLE_MAGIC
+
 
 def validate_file(file_data: bytes, content_type: str, is_free_user: bool = False) -> tuple[bool, str]:
     """Validate file size and type.
@@ -33,6 +42,16 @@ def validate_file(file_data: bytes, content_type: str, is_free_user: bool = Fals
     if len(file_data) > max_size:
         max_mb = max_size / (1024 * 1024)
         return False, f"File too large. Maximum size: {max_mb}MB"
+
+    # Reject legacy binary .doc — python-docx can only parse .docx (Open XML).
+    # The user-facing string is intentionally short and contains both languages
+    # because contracts come from many regions.
+    if _looks_like_legacy_doc(file_data):
+        return False, (
+            "Legacy .doc format is not supported. Please open the file in Word "
+            "and save it as .docx, then upload again. / 不支持旧版 .doc 文件，"
+            "请用 Word 另存为 .docx 后再上传。"
+        )
 
     return True, ""
 
@@ -57,6 +76,14 @@ def parse_file_sync(file_path: str, mime_type: str) -> dict:
     if mime_type == 'application/pdf':
         return _parse_pdf(file_path)
     elif mime_type in ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']:
+        # Safety net: reject .doc here too in case validate_file was bypassed.
+        with open(file_path, 'rb') as f:
+            head = f.read(8)
+        if head == OLE_MAGIC:
+            raise ValueError(
+                "Legacy .doc format is not supported. Please save the file as .docx and upload again. "
+                "/ 不支持旧版 .doc 文件，请另存为 .docx 后再上传。"
+            )
         return _parse_word(file_path)
     elif mime_type.startswith('image/'):
         return _parse_image(file_path)

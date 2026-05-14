@@ -1,0 +1,49 @@
+# Render Blueprint
+# Note: Render free PostgreSQL/Redis were deprecated.
+# Recommended free alternatives:
+#   - Database: https://neon.tech (free tier, generous limits)
+#   - Redis: https://upstash.com (free tier)
+# Paste their connection strings into the env vars below.
+
+services:
+  - type: web
+    name: spotclause-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRATION_HOURS
+        value: "168"
+      - key: LLM_API_BASE
+        sync: false
+      - key: LLM_MODEL
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: APP_NAME
+        value: SpotClause
+      - key: DEBUG
+        value: "false"
+      - key: DAILY_COST_LIMIT
+        value: "0.50"
+      - key: MAX_FOLLOW_UP_ROUNDS
+        value: "10"
+      - key: PORT
+        value: "8000"
+    healthCheckPath: /health

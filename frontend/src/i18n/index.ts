@@ -59,7 +59,7 @@ i18n
     fallbackLng: 'en',
     supportedLngs: supportedLanguages.map(l => l.code),
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
+      order: ['localStorage', 'htmlTag'],
       caches: ['localStorage'],
       lookupLocalStorage: 'spotclause-language',
     },

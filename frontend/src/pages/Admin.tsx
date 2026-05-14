@@ -9,7 +9,6 @@ export default function Admin() {
   const [users, setUsers] = useState<any[]>([])
   const [pricing, setPricing] = useState<any[]>([])
   const [rules, setRules] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!isAdmin) return
@@ -25,8 +24,6 @@ export default function Admin() {
       setData(res.data)
     } catch (err) {
       console.error('Failed to load dashboard', err)
-    } finally {
-      setLoading(false)
     }
   }
 

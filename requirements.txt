@@ -21,15 +21,20 @@ celery[redis]~=5.4
 redis~=5.2
 
 # Config & Validation
-pydantic~=2.0
+pydantic[email]~=2.0
 pydantic-settings~=2.7
 python-dotenv~=1.0
+email-validator~=2.2
 
 # File Parsing
 pdfplumber~=0.11
 python-docx~=1.1
 pytesseract~=0.3.13
 Pillow~=11.1
+
+# PDF Generation (reportlab ships Adobe's CJK CIDFonts, so we get
+# Chinese / Japanese / Korean text in exports without bundling font files.)
+reportlab~=4.2
 
 # Auth
 PyJWT~=2.10
@@ -38,6 +43,12 @@ python-jose[cryptography]~=3.3
 
 # HTTP Client
 httpx~=0.28
+
+# Payment
+stripe~=11.0
+
+# Google OAuth
+google-auth~=2.38
 
 # Logging
 structlog~=25.1

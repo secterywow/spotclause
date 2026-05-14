@@ -13,6 +13,8 @@ interface AuthContextType {
   user: User | null
   isLoggedIn: boolean
   isAdmin: boolean
+  showLogin: boolean
+  setShowLogin: (show: boolean) => void
   login: (token: string, user: User) => void
   logout: () => void
 }
@@ -21,6 +23,8 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoggedIn: false,
   isAdmin: false,
+  showLogin: false,
+  setShowLogin: () => {},
   login: () => {},
   logout: () => {},
 })
@@ -30,6 +34,7 @@ const USER_KEY = 'spotclause-user'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [showLogin, setShowLogin] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY)
@@ -48,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(TOKEN_KEY, token)
     localStorage.setItem(USER_KEY, JSON.stringify(userData))
     setUser(userData)
+    setShowLogin(false)
   }, [])
 
   const logout = useCallback(() => {
@@ -60,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = user?.role === 'admin'
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, isAdmin, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, isAdmin, showLogin, setShowLogin, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

@@ -7,6 +7,7 @@ export default function LanguageSwitcher() {
 
   const handleChange = (code: string) => {
     i18n.changeLanguage(code)
+    localStorage.setItem('spotclause-language', code)
     const lang = supportedLanguages.find(l => l.code === code)
     if (lang) {
       document.documentElement.dir = lang.dir

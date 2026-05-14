@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 
 interface PublicLayoutProps {
   onLoginClick: () => void
@@ -12,6 +13,7 @@ export default function PublicLayout({ onLoginClick }: PublicLayoutProps) {
       <main className="public-main">
         <Outlet />
       </main>
+      <Footer />
     </div>
   )
 }

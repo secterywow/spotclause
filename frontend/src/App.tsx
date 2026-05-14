@@ -1,38 +1,135 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ThemeProvider } from './contexts/ThemeContext'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AuthProvider } from './contexts/AuthContext'
+import { ToastProvider } from './contexts/ToastContext'
+import { useAuth } from './hooks/useAuth'
+import { useToast } from './hooks/useToast'
 import PublicLayout from './layouts/PublicLayout'
 import AppLayout from './layouts/AppLayout'
 import Home from './pages/Home'
 import Compare from './pages/Compare'
 import Pricing from './pages/Pricing'
 import Contracts from './pages/Contracts'
+import ContractReport from './pages/ContractReport'
 import Settings from './pages/Settings'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import RefundPolicy from './pages/RefundPolicy'
 import Disclaimer from './pages/Disclaimer'
 import Admin from './pages/Admin'
-import { authApi } from './lib/api'
+import ToastViewport from './components/Toast'
+import { authApi, api } from './lib/api'
+import { supportedLanguages } from './i18n'
 
 function AppContent() {
-  const { t } = useTranslation()
-  const { isLoggedIn, isAdmin, login, logout } = useAuth()
-  const [showLogin, setShowLogin] = useState(false)
+  const { t, i18n } = useTranslation()
+  const { isLoggedIn, isAdmin, login, logout, showLogin, setShowLogin } = useAuth()
+  const { showToast } = useToast()
   const [loginMode, setLoginMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // IP-based language detection
+  useEffect(() => {
+    const savedLang = localStorage.getItem('spotclause-language')
+    if (savedLang) return
+
+    api.get('/api/pricing/detect')
+      .then(res => {
+        const countryCode = res.data.country_code
+        const countryToLang: Record<string, string> = {
+          US: 'en', GB: 'en', AU: 'en', CA: 'en', NZ: 'en', IE: 'en',
+          DE: 'de', AT: 'de', CH: 'de',
+          FR: 'fr', BE: 'fr', LU: 'fr', MC: 'fr',
+          ES: 'es', MX: 'es', AR: 'es', CO: 'es', CL: 'es', PE: 'es', VE: 'es', EC: 'es', UY: 'es', PY: 'es', BO: 'es',
+          PT: 'pt', BR: 'pt', AO: 'pt', MZ: 'pt',
+          IT: 'it', SM: 'it', VA: 'it',
+          TR: 'tr', CY: 'tr',
+          TH: 'th',
+          RU: 'ru', BY: 'ru', KZ: 'ru', KG: 'ru', TJ: 'ru',
+          ID: 'id',
+          JP: 'ja',
+          KR: 'ko', KP: 'ko',
+          TW: 'zh-TW', HK: 'zh-TW', MO: 'zh-TW',
+          CN: 'zh-TW',
+          SA: 'ar', AE: 'ar', EG: 'ar', QA: 'ar', KW: 'ar', BH: 'ar', OM: 'ar', JO: 'ar', LB: 'ar',
+          IQ: 'ar', DZ: 'ar', MA: 'ar', TN: 'ar', LY: 'ar', SD: 'ar', SY: 'ar', YE: 'ar', PS: 'ar',
+        }
+        const detectedLang = countryToLang[countryCode] || 'en'
+        if (detectedLang !== 'en') {
+          i18n.changeLanguage(detectedLang)
+          const lang = supportedLanguages.find(l => l.code === detectedLang)
+          if (lang) {
+            document.documentElement.dir = lang.dir
+            document.documentElement.lang = detectedLang
+          }
+        }
+      })
+      .catch(() => {})
+  }, [i18n])
+
+  // Google Sign-In initialization
+  useEffect(() => {
+    authApi.getGoogleConfig()
+      .then(res => {
+        const clientId = res.data.client_id
+        if (!clientId) return
+
+        if (document.getElementById('google-gsi')) {
+          initGoogle(clientId)
+          return
+        }
+
+        const script = document.createElement('script')
+        script.id = 'google-gsi'
+        script.src = 'https://accounts.google.com/gsi/client'
+        script.async = true
+        script.defer = true
+        script.onload = () => initGoogle(clientId)
+        document.head.appendChild(script)
+      })
+      .catch(() => {})
+
+    function initGoogle(clientId: string) {
+      if (window.google?.accounts?.id) {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: (response: { credential?: string }) => {
+            if (response.credential) {
+              handleGoogleCredential(response.credential)
+            }
+          },
+        })
+      }
+    }
+  }, [])
+
+  const handleGoogleCredential = async (credential: string) => {
+    try {
+      setLoading(true)
+      const res = await authApi.googleLogin(credential)
+      login(res.data.access_token, res.data.user)
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || t('common.loginFailed'), 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleGoogleLogin = async () => {
-    // TODO: Integrate with Google OAuth
-    // For now, simulate login with a mock token
+    if (window.google?.accounts?.id) {
+      window.google.accounts.id.prompt()
+      return
+    }
+
+    // Development fallback when Google Client ID is not configured
     const mockToken = JSON.stringify({
-      sub: 'google-123',
-      email: 'user@example.com',
+      sub: 'google-' + Date.now(),
+      email: `user${Date.now()}@example.com`,
       name: 'Test User',
       picture: null,
     })
@@ -41,9 +138,8 @@ function AppContent() {
       setLoading(true)
       const res = await authApi.googleLogin(mockToken)
       login(res.data.access_token, res.data.user)
-      setShowLogin(false)
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed')
+      showToast(err.response?.data?.detail || t('common.loginFailed'), 'error')
     } finally {
       setLoading(false)
     }
@@ -51,38 +147,42 @@ function AppContent() {
 
   const handleEmailSubmit = async () => {
     if (!email || !password) {
-      setError('Please fill in all fields')
+      showToast(t('common.fillAllFields'), 'warning')
       return
     }
 
     try {
       setLoading(true)
-      setError('')
 
       if (loginMode === 'register') {
         const res = await authApi.register(email, password, name || undefined)
         login(res.data.access_token, res.data.user)
+        showToast(t('auth.welcomeNew', { name: res.data.user.name || res.data.user.email }), 'success')
       } else {
         const res = await authApi.login(email, password)
         login(res.data.access_token, res.data.user)
+        showToast(t('auth.welcomeBack', { name: res.data.user.name || res.data.user.email }), 'success')
       }
 
-      setShowLogin(false)
       setEmail('')
       setPassword('')
       setName('')
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Authentication failed')
+      showToast(err.response?.data?.detail || t('common.authFailed'), 'error')
     } finally {
       setLoading(false)
     }
   }
 
   const resetForm = () => {
-    setError('')
     setEmail('')
     setPassword('')
     setName('')
+  }
+
+  const openLoginModal = () => {
+    resetForm()
+    setShowLogin(true)
   }
 
   return (
@@ -94,17 +194,23 @@ function AppContent() {
             <Route path="/compare" element={<Compare />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/contracts" element={<Contracts />} />
+            <Route path="/contracts/:id" element={<ContractReport />} />
             <Route path="/settings" element={<Settings />} />
             {isAdmin && <Route path="/admin" element={<Admin />} />}
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/refund" element={<RefundPolicy />} />
+            <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         ) : (
-          <Route element={<PublicLayout onLoginClick={() => { resetForm(); setShowLogin(true); }} />}>
+          <Route element={<PublicLayout onLoginClick={openLoginModal} />}>
             <Route path="/" element={<Home />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
@@ -131,6 +237,7 @@ function AppContent() {
               </div>
               <div className="modal-right">
                 <button className="btn btn-google" onClick={handleGoogleLogin} disabled={loading}>
+                  <img src="/google-icon.svg" alt="" width="20" height="20" style={{ marginRight: '10px', flexShrink: 0 }} />
                   {t('auth.continueGoogle')}
                 </button>
                 <div className="divider">{t('common.or')}</div>
@@ -159,8 +266,6 @@ function AppContent() {
                   onChange={e => setPassword(e.target.value)}
                 />
 
-                {error && <p className="text-error">{error}</p>}
-
                 <button className="btn btn-primary" onClick={handleEmailSubmit} disabled={loading}>
                   {loading ? t('common.loading') : loginMode === 'login' ? t('auth.continueEmail') : t('common.submit')}
                 </button>
@@ -181,6 +286,8 @@ function AppContent() {
           </div>
         </div>
       )}
+
+      <ToastViewport />
     </BrowserRouter>
   )
 }
@@ -188,9 +295,11 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ToastProvider>
     </ThemeProvider>
   )
 }

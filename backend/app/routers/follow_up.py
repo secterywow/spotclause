@@ -13,6 +13,38 @@ import asyncio
 router = APIRouter(prefix="/api/follow-up", tags=["follow-up"])
 
 
+@router.get("/messages/{contract_record_id}")
+def get_messages(
+    contract_record_id: int,
+    token: str,
+    db: Session = Depends(get_db),
+):
+    """Return the chat history + remaining-rounds count for a contract record.
+    Called when the user re-opens a previously analyzed contract so the chat
+    panel can hydrate before they send a new question."""
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    user_id = int(payload["sub"])
+    record = db.query(ContractRecord).filter(
+        ContractRecord.id == contract_record_id,
+        ContractRecord.user_id == user_id,
+    ).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    msgs = db.query(ContractMessage).filter(
+        ContractMessage.contract_record_id == contract_record_id,
+    ).order_by(ContractMessage.round, ContractMessage.id).all()
+
+    user_count = sum(1 for m in msgs if m.role == "user")
+    return {
+        "messages": [{"role": m.role, "content": m.content} for m in msgs],
+        "remaining_rounds": max(0, 10 - user_count),
+    }
+
+
 @router.post("/chat/{contract_record_id}")
 async def follow_up_chat(
     contract_record_id: int,

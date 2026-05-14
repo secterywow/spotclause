@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, extract
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.database import get_db
 from app.models.contract import ContractRecord
 from app.models.user import User
@@ -12,7 +12,9 @@ router = APIRouter(prefix="/api/stats", tags=["stats"])
 
 def get_time_label(date: datetime) -> str:
     """Convert datetime to human-readable time label."""
-    now = datetime.now()
+    # created_at is timezone-aware (TIMESTAMPTZ); use a matching now()
+    tz = date.tzinfo or timezone.utc
+    now = datetime.now(tz)
     diff = now - date
 
     if diff.days == 0:
@@ -39,7 +41,7 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     ).scalar() or 0
 
     # This week (last 7 days)
-    week_ago = datetime.now() - timedelta(days=7)
+    week_ago = datetime.now(timezone.utc) - timedelta(days=7)
     this_week = db.query(func.count(ContractRecord.id)).filter(
         ContractRecord.user_id == user_id,
         ContractRecord.created_at >= week_ago

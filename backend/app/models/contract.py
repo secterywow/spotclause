@@ -1,4 +1,4 @@
-from sqlalchemy import Column, BigInteger, String, Integer, Text, DateTime, ForeignKey, func, Index
+from sqlalchemy import Column, BigInteger, String, Integer, Text, DateTime, ForeignKey, Enum, func, Index
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -8,8 +8,14 @@ class ContractRecord(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     user_id = Column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    record_type = Column(
+        Enum("analysis", "comparison", name="record_type_enum"),
+        nullable=False,
+        server_default="analysis",
+    )
     file_name = Column(String(255), nullable=False)
     file_type = Column(String(20))
+    file_hash = Column(String(64), index=True)  # SHA-256 of uploaded bytes, used for de-dup cache
     contract_type = Column(String(50))
     jurisdiction = Column(String(50))
     overall_score = Column(Integer)

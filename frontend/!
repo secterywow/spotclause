@@ -1,0 +1,43 @@
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+Retrieving project…
+Deploying secterywows-projects/spotclause
+Uploading [--------------------] (0.0B/240KB)
+Uploading [=====---------------] (64.6KB/240KB)
+Uploading [==========----------] (128.6KB/240KB)
+Uploading [===============-----] (181.6KB/240KB)
+Uploading [====================] (240.0KB/240KB)
+Inspect: https://vercel.com/secterywows-projects/spotclause/7zBnFs6hSwpqSj9p4QNAN96mFxca [3s]
+Production: https://spotclause-46me2m58p-secterywows-projects.vercel.app [3s]
+Building...
+Building: Running build in Washington, D.C., USA (East) – iad1
+Building: Build machine configuration: 2 cores, 8 GB
+Building: Retrieving list of deployment files...
+Building: Retrieving list of deployment files...
+Building: Downloading 88 deployment files...
+Building: Restored build cache from previous deployment (5FSBf1p9zgFuqJXhjUxeGQXPZ4iP)
+Building: Running "vercel build"
+Building: Vercel CLI 53.3.2
+Building: Installing dependencies...
+Building: up to date in 783ms
+Building: 52 packages are looking for funding
+Building: run `npm fund` for details
+Building: > frontend@0.0.0 build
+Building: > tsc -b && vite build
+Building: vite v8.0.11 building client environment for production...
+Building: transforming...✓ 151 modules transformed.
+Building: rendering chunks...
+Building: computing gzip size...
+Building: dist/index.html                   0.48 kB │ gzip:   0.31 kB
+Building: dist/assets/index-paQEbWi9.css   64.55 kB │ gzip:  11.66 kB
+Building: dist/assets/index-But6lnTb.js   586.13 kB │ gzip: 176.80 kB
+Building: ✓ built in 558ms
+Building: [plugin builtin:vite-reporter]
+Building: (!) Some chunks are larger than 500 kB after minification. Consider:
+Building: - Using dynamic import() to code-split the application
+Building: - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+Building: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+Building: Build Completed in /vercel/output [8s]
+Building: Deploying outputs...
+[2K[1A[2K[GProduction: https://spotclause-46me2m58p-secterywows-projects.vercel.app [17s]
+Completing...
+Aliased: https://spotclause.app [17s]

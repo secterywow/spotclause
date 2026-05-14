@@ -1,10 +1,75 @@
 import json
-from typing import List, Dict
+import re
+from typing import List, Dict, Set, Tuple
 from app.config import get_settings
 from app.logger import get_logger
 
 settings = get_settings()
 logger = get_logger(__name__)
+
+# Common Chinese legal stop-words that appear in almost every contract.
+_CHINESE_STOP_WORDS = set(
+    "的之一是在了和与为甲方乙方合同协议双方约定条款签署"
+    "本日年月日期限届满终止解除违约赔偿责任"
+    "人民币元整佰仟万拾付款支付"
+)
+
+
+def _clean_text(text: str) -> str:
+    """Remove punctuation, whitespace, and common stop-words."""
+    # Keep CJK unified ideographs + alphanumeric
+    cleaned = re.sub(r"[^一-鿿\w]", "", text)
+    # Strip common stop-words (each character)
+    return "".join(ch for ch in cleaned if ch not in _CHINESE_STOP_WORDS)
+
+
+def _ngrams(text: str, n: int = 3) -> Set[str]:
+    """Return a set of n-grams from the text."""
+    return {text[i : i + n] for i in range(len(text) - n + 1)}
+
+
+def _text_similarity(a: str, b: str) -> float:
+    """Jaccard similarity over 3-grams after cleaning.
+
+    SequenceMatcher (char-level LCS) inflates similarity for Chinese
+    because unrelated contracts share many common characters.
+    Jaccard on cleaned 3-grams avoids that false signal.
+    """
+    ca = _clean_text(a)
+    cb = _clean_text(b)
+
+    if not ca or not cb:
+        return 0.0
+
+    ga = _ngrams(ca, 3)
+    gb = _ngrams(cb, 3)
+
+    if not ga or not gb:
+        return 0.0
+
+    intersection = ga & gb
+    union = ga | gb
+    return len(intersection) / len(union)
+
+
+def check_contract_relatedness(
+    old_text: str, new_text: str, threshold: float = 0.20
+) -> Tuple[bool, float]:
+    """Check whether two texts are likely versions of the same contract.
+
+    Returns (is_related, similarity).
+    """
+    similarity = _text_similarity(old_text, new_text)
+    is_related = similarity >= threshold
+    logger.info(
+        "Contract similarity check",
+        similarity=round(similarity, 4),
+        threshold=threshold,
+        is_related=is_related,
+        old_len=len(old_text),
+        new_len=len(new_text),
+    )
+    return is_related, similarity
 
 
 def align_differences(old_text: str, new_text: str) -> List[Dict]:
@@ -24,7 +89,9 @@ Return a JSON array of changes:
     "newText": "new text (if modified/added)"
   },
   ...
-]"""
+]
+
+IMPORTANT: All textual VALUES (location, oldText, newText) must be in the SAME LANGUAGE as the contract text. If the contract is in Chinese, write location names in Chinese. JSON keys stay English."""
 
     messages = [
         SystemMessage(content=system_prompt),
@@ -50,7 +117,9 @@ Return a JSON object:
 {
   "riskChange": "improved|worsened|unchanged|new",
   "analysis": "detailed explanation of the risk impact"
-}"""
+}
+
+IMPORTANT: Write the `analysis` field in the SAME LANGUAGE as the change text below. If the change text is Chinese, write the analysis in Chinese. The `riskChange` enum value stays English."""
 
     messages = [
         SystemMessage(content=system_prompt),
@@ -86,7 +155,9 @@ Return a JSON array:
     "newWording": "new wording"
   },
   ...
-] or [] if no traps found."""
+] or [] if no traps found.
+
+IMPORTANT: All textual values (location, description, oldWording, newWording) must be in the SAME LANGUAGE as the contract text. If the changes are in Chinese, respond in Chinese. JSON keys stay English."""
 
     messages = [
         SystemMessage(content=system_prompt),
@@ -115,10 +186,25 @@ def assemble_compare_report(changes: List[Dict], hidden_traps: List[Dict]) -> Di
     else:
         overall = "mixed"
 
-    summary = f"Found {len(changes)} changes: {improved} improved, {worsened} worsened, {unchanged} unchanged, {new_items} new. {len(hidden_traps)} hidden traps detected."
+    # Structured counts so the frontend can render a localized summary
+    # sentence; the `summary` string is kept as an English fallback.
+    breakdown = {
+        "changes": len(changes),
+        "improved": improved,
+        "worsened": worsened,
+        "unchanged": unchanged,
+        "new": new_items,
+        "traps": len(hidden_traps),
+    }
+    summary = (
+        f"Found {breakdown['changes']} changes: {improved} improved, "
+        f"{worsened} worsened, {unchanged} unchanged, {new_items} new. "
+        f"{len(hidden_traps)} hidden traps detected."
+    )
 
     return {
         "summary": summary,
+        "breakdown": breakdown,
         "overallRiskChange": overall,
         "changes": changes,
         "hiddenTraps": hidden_traps,
