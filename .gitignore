@@ -59,6 +59,7 @@ logs/
 data/
 cache/
 tmp/
+!backend/app/data/
 
 # Jupyter Notebook
 .ipynb_checkpoints
