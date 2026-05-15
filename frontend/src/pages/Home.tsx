@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Helmet } from 'react-helmet-async'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import { api } from '../lib/api'
@@ -289,7 +290,15 @@ export default function Home() {
   }
 
   return (
-    <div className="page home-page">
+    <>
+      <Helmet>
+        <meta property="og:title" content="SpotClause - AI Contract Reader" />
+        <meta property="og:description" content="AI-powered contract reading for freelancers and small businesses. Spot key clauses before you sign." />
+        <meta property="og:image" content="https://spotclause.app/og-review.jpg" />
+        <meta property="og:url" content="https://spotclause.app" />
+        <meta name="twitter:image" content="https://spotclause.app/og-review.jpg" />
+      </Helmet>
+      <div className="page home-page">
       <input
         ref={fileInputRef}
         type="file"
@@ -369,6 +378,7 @@ export default function Home() {
         />
       )}
     </div>
+    </>
   )
 }
 

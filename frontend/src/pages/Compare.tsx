@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Helmet } from 'react-helmet-async'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 import { api } from '../lib/api'
@@ -201,7 +202,15 @@ export default function Compare() {
   }
 
   return (
-    <div className="page compare-page">
+    <>
+      <Helmet>
+        <meta property="og:title" content="SpotClause - Compare Contracts" />
+        <meta property="og:description" content="Compare two contract versions and spot every change with AI." />
+        <meta property="og:image" content="https://spotclause.app/og-compare.jpg" />
+        <meta property="og:url" content="https://spotclause.app/compare" />
+        <meta name="twitter:image" content="https://spotclause.app/og-compare.jpg" />
+      </Helmet>
+      <div className="page compare-page">
       {!isLoggedIn ? (
         <div className="hero-wrapper">
           <div className="hero-section">
@@ -417,6 +426,7 @@ export default function Compare() {
         />
       )}
     </div>
+    </>
   )
 }
 
