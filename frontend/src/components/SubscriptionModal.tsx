@@ -129,7 +129,7 @@ export default function SubscriptionModal({ reason, onClose }: Props) {
                     ))}
                   </ul>
                   <button
-                    className={`btn ${popular ? 'btn-primary' : 'btn-secondary'}`}
+                    className="btn btn-primary"
                     onClick={onClose}
                   >
                     {t('pricing.upgrade')}
