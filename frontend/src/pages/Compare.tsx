@@ -91,14 +91,12 @@ export default function Compare() {
     }
   }
 
-  const handleClick = async (e: React.MouseEvent, which: 'old' | 'new') => {
+  const handleClick = (e: React.MouseEvent, which: 'old' | 'new') => {
     e.stopPropagation()
     if (!isLoggedIn) {
       setShowLogin(true)
       return
     }
-    const ok = await checkUsage()
-    if (!ok) return
     if (which === 'old') oldFileRef.current?.click()
     else newFileRef.current?.click()
   }

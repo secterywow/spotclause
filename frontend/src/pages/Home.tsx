@@ -86,14 +86,12 @@ export default function Home() {
     }
   }, [isLoggedIn, setShowLogin, user])
 
-  const handleClick = async (e?: React.MouseEvent) => {
+  const handleClick = (e?: React.MouseEvent) => {
     e?.stopPropagation()
     if (!isLoggedIn) {
       setShowLogin(true)
       return
     }
-    const ok = await checkUsage()
-    if (!ok) return
     fileInputRef.current?.click()
   }
 
@@ -107,6 +105,9 @@ export default function Home() {
       setShowLogin(true)
       return
     }
+
+    const ok = await checkUsage()
+    if (!ok) return
 
     // Tear down any prior stream from a previous run
     sseRef.current?.close()
