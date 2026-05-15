@@ -47,6 +47,9 @@ httpx~=0.28
 # Payment
 stripe~=11.0
 
+# Email
+resend~=2.30
+
 # Google OAuth
 google-auth~=2.38
 
