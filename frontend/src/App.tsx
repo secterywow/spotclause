@@ -230,6 +230,13 @@ function AppContent() {
 
   const openLoginModal = () => {
     resetForm()
+    setLoginMode('login')
+    setShowLogin(true)
+  }
+
+  const openRegisterModal = () => {
+    resetForm()
+    setLoginMode('register')
     setShowLogin(true)
   }
 
@@ -252,7 +259,7 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         ) : (
-          <Route element={<PublicLayout onLoginClick={openLoginModal} />}>
+          <Route element={<PublicLayout onLoginClick={openLoginModal} onRegisterClick={openRegisterModal} />}>
             <Route path="/" element={<Home />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/pricing" element={<Pricing />} />

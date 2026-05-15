@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import ThemeToggle from './ThemeToggle'
 import LanguageSwitcher from './LanguageSwitcher'
+import SubscriptionModal from './SubscriptionModal'
 
 interface SidebarProps {
   onLogout: () => void
@@ -86,6 +88,7 @@ const DiamondIcon = () => (
 
 export default function Sidebar({ onLogout }: SidebarProps) {
   const { t } = useTranslation()
+  const [showSubModal, setShowSubModal] = useState(false)
 
   const menuItems = [
     { path: '/', label: t('nav.review'), Icon: ReviewIcon },
@@ -119,11 +122,11 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       <div className="sidebar-footer">
         <div className="upgrade-card">
           <span className="upgrade-icon"><DiamondIcon /></span>
-          <p className="upgrade-text">{t('pricing.upgrade')}</p>
+          <p className="upgrade-text">Upgrade</p>
           <p className="upgrade-sub">{t('settings.upgradePrompt')}</p>
-          <NavLink to="/pricing" className="btn btn-outline btn-sm">
-            {t('pricing.getStarted')}
-          </NavLink>
+          <button className="btn btn-outline btn-sm" onClick={() => setShowSubModal(true)}>
+            Upgrade
+          </button>
         </div>
         <div className="sidebar-actions">
           <LanguageSwitcher />
@@ -136,6 +139,13 @@ export default function Sidebar({ onLogout }: SidebarProps) {
           </div>
         </div>
       </div>
+
+      {showSubModal && (
+        <SubscriptionModal
+          reason={t('settings.upgradePrompt')}
+          onClose={() => setShowSubModal(false)}
+        />
+      )}
     </aside>
   )
 }

@@ -4,12 +4,13 @@ import Footer from '../components/Footer'
 
 interface PublicLayoutProps {
   onLoginClick: () => void
+  onRegisterClick: () => void
 }
 
-export default function PublicLayout({ onLoginClick }: PublicLayoutProps) {
+export default function PublicLayout({ onLoginClick, onRegisterClick }: PublicLayoutProps) {
   return (
     <div className="public-layout">
-      <Navbar onLoginClick={onLoginClick} />
+      <Navbar onLoginClick={onLoginClick} onRegisterClick={onRegisterClick} />
       <main className="public-main">
         <Outlet />
       </main>
