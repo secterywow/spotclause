@@ -56,7 +56,7 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
     # Average score
     avg_score = db.query(func.avg(ContractRecord.overall_score)).filter(
         ContractRecord.user_id == user_id,
-        ContractRecord.overall_score.isnot(None)
+        ContractRecord.overall_score.is_not(None)
     ).scalar() or 0
 
     # Last analyze time

@@ -515,7 +515,7 @@ async def analyze_contract_endpoint(
     cached = (
         db.query(ContractRecord)
         .filter(ContractRecord.file_hash == file_hash)
-        .filter(ContractRecord.report_json.isnot(None))
+        .filter(ContractRecord.report_json.is_not(None))
         .order_by(ContractRecord.created_at.desc())
         .first()
     )
