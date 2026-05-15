@@ -25,7 +25,16 @@
     "alreadyHaveAccount": "已有帳號？",
     "namePlaceholder": "姓名(選填)",
     "welcomeNew": "歡迎加入,{{name}}!",
-    "welcomeBack": "歡迎回來,{{name}}!"
+    "welcomeBack": "歡迎回來,{{name}}!",
+    "verificationCode": "驗證碼",
+    "sendCode": "發送驗證碼",
+    "resend": "重新發送",
+    "resendCode": "{{seconds}}秒後重發",
+    "codeSent": "驗證碼已發送至您的郵箱",
+    "codeSendFailed": "發送驗證碼失敗",
+    "codeRequired": "請輸入驗證碼",
+    "emailRequired": "請輸入電子郵件",
+    "passwordRequired": "請輸入密碼"
   },
   "home": {
     "heroEyebrow": "AI 合約閱讀工具",

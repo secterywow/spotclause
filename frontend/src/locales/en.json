@@ -25,7 +25,16 @@
     "alreadyHaveAccount": "Already have an account?",
     "namePlaceholder": "Name (optional)",
     "welcomeNew": "Welcome aboard, {{name}}!",
-    "welcomeBack": "Welcome back, {{name}}!"
+    "welcomeBack": "Welcome back, {{name}}!",
+    "verificationCode": "Verification code",
+    "sendCode": "Send code",
+    "resend": "Resend",
+    "resendCode": "Resend in {{seconds}}s",
+    "codeSent": "Verification code sent to your email",
+    "codeSendFailed": "Failed to send verification code",
+    "codeRequired": "Please enter the verification code",
+    "emailRequired": "Please enter your email",
+    "passwordRequired": "Please enter your password"
   },
   "home": {
     "heroEyebrow": "AI Contract Reader",

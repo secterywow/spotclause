@@ -42,7 +42,16 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    # Verify the email verification code
+    if not user_data.code:
+        raise HTTPException(status_code=400, detail="Verification code is required")
+    if not verify_email_code(user_data.email, user_data.code):
+        raise HTTPException(status_code=400, detail="Invalid or expired verification code")
+
     user = create_user(db, user_data)
+    # Mark as verified since we just checked the code
+    user.email_verified = True
+    db.commit()
     token = create_token_for_user(user)
     return {"access_token": token, "token_type": "bearer", "user": user}
 
@@ -52,6 +61,9 @@ def login(login_data: UserLogin, db: Session = Depends(get_db)):
     user = authenticate_user(db, login_data)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    if not user.email_verified:
+        raise HTTPException(status_code=403, detail="Email not verified. Please verify your email before logging in.")
 
     token = create_token_for_user(user)
     return {"access_token": token, "token_type": "bearer", "user": user}

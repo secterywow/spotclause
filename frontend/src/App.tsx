@@ -31,6 +31,9 @@ function AppContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+  const [codeSent, setCodeSent] = useState(false)
+  const [countdown, setCountdown] = useState(0)
   const [loading, setLoading] = useState(false)
 
   // IP-based language detection
@@ -151,11 +154,16 @@ function AppContent() {
       return
     }
 
+    if (loginMode === 'register' && !verificationCode) {
+      showToast(t('auth.codeRequired'), 'warning')
+      return
+    }
+
     try {
       setLoading(true)
 
       if (loginMode === 'register') {
-        const res = await authApi.register(email, password, name || undefined)
+        const res = await authApi.register(email, password, verificationCode, name || undefined)
         login(res.data.access_token, res.data.user)
         showToast(t('auth.welcomeNew', { name: res.data.user.name || res.data.user.email }), 'success')
       } else {
@@ -167,6 +175,8 @@ function AppContent() {
       setEmail('')
       setPassword('')
       setName('')
+      setVerificationCode('')
+      setCodeSent(false)
     } catch (err: any) {
       showToast(err.response?.data?.detail || t('common.authFailed'), 'error')
     } finally {
@@ -174,10 +184,48 @@ function AppContent() {
     }
   }
 
+  const sendVerificationCode = async () => {
+    if (!email) {
+      showToast(t('auth.emailRequired'), 'warning')
+      return
+    }
+    if (!password) {
+      showToast(t('auth.passwordRequired'), 'warning')
+      return
+    }
+
+    try {
+      setLoading(true)
+      const res = await authApi.sendVerifyCode(email)
+      setCodeSent(true)
+      setCountdown(60)
+      showToast(t('auth.codeSent'), 'success')
+      if (res.data.code) {
+        console.log('Debug verification code:', res.data.code)
+      }
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || t('auth.codeSendFailed'), 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    if (countdown <= 0) return
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1)
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [countdown])
+
   const resetForm = () => {
     setEmail('')
     setPassword('')
     setName('')
+    setVerificationCode('')
+    setCodeSent(false)
+    setCountdown(0)
   }
 
   const openLoginModal = () => {
@@ -265,6 +313,31 @@ function AppContent() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                 />
+
+                {loginMode === 'register' && (
+                  <div className="code-input-row">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      placeholder={t('auth.verificationCode')}
+                      className="input code-input"
+                      value={verificationCode}
+                      onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      maxLength={6}
+                    />
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={sendVerificationCode}
+                      disabled={loading || countdown > 0}
+                    >
+                      {countdown > 0
+                        ? t('auth.resendCode', { seconds: countdown })
+                        : codeSent
+                          ? t('auth.resend')
+                          : t('auth.sendCode')}
+                    </button>
+                  </div>
+                )}
 
                 <button className="btn btn-primary" onClick={handleEmailSubmit} disabled={loading}>
                   {loading ? t('common.loading') : loginMode === 'login' ? t('auth.continueEmail') : t('common.submit')}

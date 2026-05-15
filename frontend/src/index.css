@@ -491,6 +491,25 @@ a:hover {
   color: var(--text-muted);
 }
 
+/* Verification code input row */
+.code-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.code-input-row .code-input {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.code-input-row .btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 /* ========== Theme Toggle ========== */
 .theme-toggle {
   display: flex;
