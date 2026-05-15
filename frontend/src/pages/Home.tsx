@@ -86,8 +86,13 @@ export default function Home() {
     }
   }, [isLoggedIn, setShowLogin, user])
 
+  const lastClickTime = useRef(0)
+
   const handleClick = (e?: React.MouseEvent) => {
     e?.stopPropagation()
+    const now = Date.now()
+    if (now - lastClickTime.current < 500) return
+    lastClickTime.current = now
     if (!isLoggedIn) {
       setShowLogin(true)
       return
@@ -224,6 +229,14 @@ export default function Home() {
 
   return (
     <div className="page home-page">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
+        style={{ display: 'none' }}
+        onChange={handleFileSelect}
+        onClick={(e) => e.stopPropagation()}
+      />
       {!isLoggedIn && !isAnalyzing ? (
         <div className="hero-wrapper">
           <div className="hero-section">
@@ -244,13 +257,6 @@ export default function Home() {
             onDrop={handleDrop}
             onClick={handleClick}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
-              style={{ display: 'none' }}
-              onChange={handleFileSelect}
-            />
             <div className="upload-icon-wrap">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -276,13 +282,6 @@ export default function Home() {
             onDrop={handleDrop}
             onClick={handleClick}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.webp"
-              style={{ display: 'none' }}
-              onChange={handleFileSelect}
-            />
             <div className="upload-icon-wrap">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
