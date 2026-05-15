@@ -35,6 +35,19 @@ export default function Home() {
   const [subModalReason, setSubModalReason] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const sseRef = useRef<EventSource | null>(null)
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Clean up any open SSE or polling timer on unmount
+  useEffect(() => {
+    return () => {
+      sseRef.current?.close()
+      sseRef.current = null
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current)
+        pollTimerRef.current = null
+      }
+    }
+  }, [])
 
   const checkUsage = async (): Promise<boolean> => {
     if (!isLoggedIn || !user) return false
@@ -114,9 +127,13 @@ export default function Home() {
     const ok = await checkUsage()
     if (!ok) return
 
-    // Tear down any prior stream from a previous run
+    // Tear down any prior stream or polling timer from a previous run
     sseRef.current?.close()
     sseRef.current = null
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current)
+      pollTimerRef.current = null
+    }
 
     setReport(null)
     setIsAnalyzing(true)
@@ -184,11 +201,19 @@ export default function Home() {
             // side-info finishes alongside clause analysis; no step bump
             break
           case 'complete':
+            if (pollTimerRef.current) {
+              clearInterval(pollTimerRef.current)
+              pollTimerRef.current = null
+            }
             setReport(evt.report)
             setIsAnalyzing(false)
             teardown()
             break
           case 'error':
+            if (pollTimerRef.current) {
+              clearInterval(pollTimerRef.current)
+              pollTimerRef.current = null
+            }
             showToast(evt.message || t('home.analysisFailed'), 'error')
             setIsAnalyzing(false)
             teardown()
@@ -198,17 +223,53 @@ export default function Home() {
         }
       }
 
+      // When the SSE drops (e.g. Render 100s timeout, proxy idle timeout),
+      // fall back to polling the DB so the analysis can finish in the
+      // background without the user seeing a fake failure toast.
+      const startPolling = () => {
+        if (pollTimerRef.current) {
+          clearInterval(pollTimerRef.current)
+        }
+        setProgress({ step: 4, stepName: t('home.step4') })
+        pollTimerRef.current = setInterval(async () => {
+          try {
+            const statusRes = await api.get(`/api/contracts/${contract_record_id}/status`)
+            const data = statusRes.data
+            if (data.report) {
+              if (pollTimerRef.current) {
+                clearInterval(pollTimerRef.current)
+                pollTimerRef.current = null
+              }
+              setReport(data.report)
+              setIsAnalyzing(false)
+            }
+            if (data.error) {
+              if (pollTimerRef.current) {
+                clearInterval(pollTimerRef.current)
+                pollTimerRef.current = null
+              }
+              showToast(data.error || t('home.analysisFailed'), 'error')
+              setIsAnalyzing(false)
+            }
+          } catch {
+            // Polling errors are silent — we'll try again in 5s.
+          }
+        }, 5000)
+      }
+
       es.onerror = () => {
-        // EventSource auto-fires `error` when the server closes the stream
-        // cleanly — only treat it as a real failure if we haven't already
-        // received a terminal event.
         if (finished) return
         teardown()
-        setIsAnalyzing(false)
-        showToast(t('home.analysisFailed'), 'error')
+        // Don't show an error — the backend is still crunching in the
+        // background task. Switch to polling instead.
+        startPolling()
       }
 
     } catch (err: any) {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current)
+        pollTimerRef.current = null
+      }
       showToast(err.response?.data?.detail || t('home.analysisFailed'), 'error')
       setIsAnalyzing(false)
       sseRef.current?.close()
