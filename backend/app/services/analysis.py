@@ -264,7 +264,7 @@ def analyze_contract_full(text: str, jurisdiction: str) -> Dict:
     from app.agent.llms import llm
     from langchain_core.messages import SystemMessage, HumanMessage
 
-    system_prompt = f"""You are a senior contract attorney. Analyze the ENTIRE contract below and return ONE JSON object.
+    system_prompt = f"""You are an AI document assistant. Analyze the ENTIRE contract below and return ONE JSON object.
 
 Return ONLY the JSON — no markdown fences, no prose before/after.
 
@@ -278,8 +278,8 @@ Schema (exact field names, exact shape):
       "content": "verbatim or near-verbatim clause text from the contract",
       "category": "obligation|right|payment|termination|liability|dispute|general",
       "riskLevel": "high|medium|low",
-      "explanation": "plain-language explanation a non-lawyer can follow (1-3 sentences)",
-      "riskReason": "concrete reason WHY this is risky for the user, citing the specific legal principle / statute / case where relevant. Empty string if no risk.",
+      "explanation": "plain-language explanation anyone can follow (1-3 sentences)",
+      "riskReason": "concrete reason WHY this clause deserves attention, citing relevant document standards or practices where applicable. Empty string if no concern.",
       "solution": "actionable suggested fix for the user. Empty string if no fix needed.",
       "negotiationScript": {{
         "yourOpening": "what the user should say to push back",
@@ -308,13 +308,13 @@ Hard rules — follow them literally to keep output STABLE across runs of the sa
    - The "title" field MUST come from the section heading in the contract verbatim if one exists; otherwise pick the first noun phrase of the clause.
 
 2. RISK RUBRIC (apply literally — these anchors define the levels)
-   - "high"   = the clause materially shifts financial, IP, liability, termination, or legal-recourse rights against the user, OR violates mandatory law in {jurisdiction}. Examples: uncapped indemnity, perpetual non-compete, unilateral price changes, waiver of statutory rights, blanket IP assignment with no carve-outs.
-   - "medium" = the clause is one-sided, ambiguous, or below standard market practice but does not by itself create a catastrophic exposure. Examples: short cure periods, broad confidentiality with no time limit, vague acceptance criteria, governing law in counterparty's jurisdiction without dispute-forum carve-out.
-   - "low"    = the clause is market-standard, mutually balanced, purely definitional, or administrative boilerplate. ALSO use "low" for clauses you have no specific complaint about.
+   - "high"   = the clause materially shifts financial, IP, liability, termination, or remedy rights against the user, OR represents an unusual or non-standard practice in {jurisdiction}. Examples: uncapped indemnity, perpetual non-compete, unilateral price changes, waiver of important rights, blanket IP assignment with no carve-outs.
+   - "medium" = the clause is one-sided, ambiguous, or below standard market practice but does not by itself create a catastrophic exposure. Examples: short cure periods, broad confidentiality with no time limit, vague acceptance criteria, counterparty-favorable jurisdiction without dispute-forum carve-out.
+   - "low"    = the clause is market-standard, mutually balanced, purely definitional, or administrative boilerplate. ALSO use "low" for clauses you have no specific concern about.
    - When uncertain between two levels, pick the LOWER one.
 
 3. SEVERITY FOR missingClauses
-   - "high" only if the clause's absence creates legal/financial exposure (e.g. missing IP ownership, missing limitation of liability in a service contract).
+   - "high" only if the clause's absence creates a significant concern (e.g. missing IP ownership, missing limitation of liability in a service contract).
    - Otherwise "medium" or "low" per the same rubric.
 
 4. FIXED COUNTS (to remove run-to-run variance on subjective inclusion calls)
@@ -634,7 +634,7 @@ def extract_dates(text: str) -> List[Dict]:
     return dates[:20]
 
 
-_STRUCTURE_SYSTEM_PROMPT = """You are a senior contract attorney. Your only job here is to STRUCTURE the contract — list every distinct clause, top to bottom — and identify the contract type.
+_STRUCTURE_SYSTEM_PROMPT = """You are an AI document assistant. Your only job here is to STRUCTURE the contract — list every distinct clause, top to bottom — and identify the contract type.
 
 Return ONLY a JSON object (no markdown fences, no prose).
 
@@ -705,15 +705,15 @@ def extract_structure_pass(text: str, jurisdiction: str) -> Dict:
     return {'contractType': contract_type, 'clauses': clauses}
 
 
-_RISK_SYSTEM_PROMPT_TEMPLATE = """You are a senior contract attorney analyzing ONE clause from a {contract_type} contract under {jurisdiction} law.
+_RISK_SYSTEM_PROMPT_TEMPLATE = """You are an AI document assistant analyzing ONE clause from a {contract_type} contract under {jurisdiction} law.
 
 Return ONLY a JSON object (no markdown fences, no prose, no extra fields).
 
 Schema:
 {{
   "riskLevel": "high|medium|low",
-  "explanation": "plain-language explanation a non-lawyer can follow (1-3 sentences)",
-  "riskReason": "concrete reason WHY this is risky for the user, citing the specific legal principle / statute. Empty string if not risky.",
+  "explanation": "plain-language explanation anyone can follow (1-3 sentences)",
+  "riskReason": "concrete reason WHY this clause deserves attention, citing relevant document standards or practices. Empty string if not noteworthy.",
   "solution": "actionable suggested fix. Empty string if no fix needed.",
   "negotiationScript": {{
     "yourOpening": "what the user should say to push back",
@@ -723,7 +723,7 @@ Schema:
 }}
 
 Risk rubric (apply literally):
-- "high"   = materially shifts financial / IP / liability / termination / legal-recourse rights AGAINST the user, OR violates mandatory law in {jurisdiction}.
+- "high"   = materially shifts financial / IP / liability / termination / remedy rights AGAINST the user, OR represents an unusual or non-standard practice in {jurisdiction}.
 - "medium" = one-sided, ambiguous, or below standard market practice but not catastrophic.
 - "low"    = market-standard, mutually balanced, definitional, or administrative boilerplate. ALSO use "low" if you have no specific complaint.
 - When uncertain between two levels, pick the LOWER one.
@@ -778,7 +778,7 @@ def analyze_single_clause(clause: Dict, contract_type: str, jurisdiction: str) -
     }
 
 
-_SIDE_INFO_SYSTEM_PROMPT = """You are a senior contract attorney auditing a {contract_type} contract under {jurisdiction} law.
+_SIDE_INFO_SYSTEM_PROMPT = """You are an AI document assistant reviewing a {contract_type} contract under {jurisdiction} law.
 
 Given the contract text below and the list of clause titles already identified, produce three side-channel outputs:
   • missingClauses — clauses that SHOULD be present but are absent (max 8)
@@ -799,7 +799,7 @@ Return ONLY a JSON object (no fences, no prose):
 }}
 
 Hard rules:
-- missingClauses: AT MOST 8, ranked by severity then importance under {jurisdiction}. "high" only if the absence creates real legal/financial exposure.
+- missingClauses: AT MOST 8, ranked by severity then importance under {jurisdiction}. "high" only if the absence creates a significant concern.
 - keyTerms: EXACTLY 10. Pick the most jargon-heavy / defined terms in document order. If fewer than 10 exist, pad with the next most useful defined terms.
 - keyDates: one entry per distinct date. ISO YYYY-MM-DD. If the contract gives a relative date and a signing date is fixed elsewhere, compute the absolute date; otherwise omit. Chronological order. If a single sentence mentions multiple dates, emit one entry per date.
 - All human-readable fields in the SAME language as the contract body.

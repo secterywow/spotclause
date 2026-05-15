@@ -77,7 +77,7 @@ def align_differences(old_text: str, new_text: str) -> List[Dict]:
     from app.agent.llms import llm
     from langchain_core.messages import SystemMessage, HumanMessage
 
-    system_prompt = """Compare two versions of a contract and identify all differences.
+    system_prompt = """Compare two versions of a document and identify all differences.
 
 Return a JSON array of changes:
 [
@@ -111,7 +111,7 @@ def analyze_change_risk(change: Dict) -> Dict:
     from app.agent.llms import llm
     from langchain_core.messages import SystemMessage, HumanMessage
 
-    system_prompt = """Analyze how a contract change affects risk. Determine if it improves, worsens, or is neutral.
+    system_prompt = """Analyze how a document change affects terms. Determine if it improves, worsens, or is neutral.
 
 Return a JSON object:
 {
@@ -144,7 +144,7 @@ def detect_hidden_traps(changes: List[Dict]) -> List[Dict]:
         for i, c in enumerate(changes[:10])  # Limit to first 10
     ])
 
-    system_prompt = """Analyze contract changes for "hidden traps" - changes that appear to modify terms but actually maintain the same legal effect (word games).
+    system_prompt = """Analyze document changes for "wording differences" - changes that appear to modify terms but actually maintain the same document effect.
 
 Return a JSON array:
 [

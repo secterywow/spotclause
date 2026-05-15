@@ -12,7 +12,7 @@ export default function Terms() {
 
         <section>
           <h2>2. Description of Service</h2>
-          <p>SpotClause is an AI-powered contract reading assistant that helps users scan, compare, and get a quick overview of contract documents. The Service provides automated text pattern detection, clause highlighting, and document comparison features for informational purposes only. SpotClause is a software tool, not a law firm, and does not provide legal advice or professional services of any kind.</p>
+          <p>SpotClause is an AI-powered document assistant that helps users scan, compare, and get a quick overview of contract documents. The Service provides automated text pattern detection, clause highlighting, and document comparison features for informational purposes only. SpotClause is a software tool and does not provide professional advice or regulated services of any kind.</p>
         </section>
 
         <section>
@@ -27,7 +27,7 @@ export default function Terms() {
 
         <section>
           <h2>5. Usage Limits</h2>
-          <p>Free plan users are limited to 1 contract review and 1 contract comparison. Paid plan users receive monthly quotas that reset at the beginning of each billing cycle. Unused quotas do not roll over.</p>
+          <p>Free plan users are limited to 1 document reading and 1 document comparison. Paid plan users receive monthly quotas that reset at the beginning of each billing cycle. Unused quotas do not roll over.</p>
         </section>
 
         <section>
@@ -49,7 +49,7 @@ export default function Terms() {
 
         <section>
           <h2>8. Disclaimer</h2>
-          <p>SpotClause is a software application, not a law firm. The output provided by our AI is generated automatically by software algorithms and is for informational purposes only. It does not constitute legal advice, professional opinion, or any form of regulated service. For important legal decisions, please consult a qualified attorney.</p>
+          <p>SpotClause is a software application. The output provided by our AI is generated automatically by software algorithms and is for informational purposes only. It does not constitute professional advice or any form of regulated service. For important decisions, please consult a qualified professional.</p>
         </section>
 
         <section>

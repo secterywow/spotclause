@@ -10,7 +10,7 @@ export default function Privacy() {
           <p>We collect the following types of information:</p>
           <ul>
             <li><strong>Account Information:</strong> Email address, name, and authentication provider details when you create an account.</li>
-            <li><strong>Uploaded Documents:</strong> Contract files you upload for analysis. These are processed by our AI and stored temporarily.</li>
+            <li><strong>Uploaded Documents:</strong> Document files you upload for analysis. These are processed by our AI and stored temporarily.</li>
             <li><strong>Usage Data:</strong> Number of analyses performed, feature usage, and subscription status.</li>
             <li><strong>Technical Data:</strong> IP address, browser type, and device information for security and analytics.</li>
           </ul>
@@ -21,7 +21,7 @@ export default function Privacy() {
           <p>We use your information to:</p>
           <ul>
             <li>Provide and maintain the Service</li>
-            <li>Process contract analyses and comparisons</li>
+            <li>Process document readings and comparisons</li>
             <li>Manage your subscription and usage limits</li>
             <li>Improve our AI models and service quality</li>
             <li>Send important account and billing notifications</li>

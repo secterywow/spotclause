@@ -291,8 +291,8 @@ def generate_pdf_bytes(report: Dict, file_name: str = "contract") -> bytes:
     elements.append(HRFlowable(width="100%", color=colors.HexColor("#e2e8f0"), thickness=0.4))
     elements.append(Spacer(1, 2 * mm))
     elements.append(Paragraph(
-        "SpotClause AI is not a law firm. This report is for reference only and is not legal advice. "
-        "SpotClause AI 非律师事务所，本报告仅供参考，不构成法律意见。",
+        "SpotClause AI is a software tool. This report is generated automatically for informational purposes only. "
+        "SpotClause AI 是一款软件工具，本报告由程序自动生成，仅供参考。",
         muted,
     ))
 
@@ -529,8 +529,8 @@ def generate_docx_bytes(report: Dict, file_name: str = "contract") -> bytes:
     doc.add_paragraph()
     disc = doc.add_paragraph()
     disc_run = disc.add_run(
-        "SpotClause AI is not a law firm. This report is for reference only and is not legal advice. "
-        "SpotClause AI 非律师事务所，本报告仅供参考，不构成法律意见。"
+        "SpotClause AI is a software tool. This report is generated automatically for informational purposes only. "
+        "SpotClause AI 是一款软件工具，本报告由程序自动生成，仅供参考。"
     )
     disc_run.font.size = Pt(8)
     disc_run.font.color.rgb = RGBColor.from_string("64748b")

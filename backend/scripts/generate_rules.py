@@ -44,7 +44,7 @@ BATCH_SIZE = 20  # rules per LLM call (larger = fewer round-trips)
 MAX_WORKERS = 4  # parallel contract-type generation
 
 
-SYSTEM_PROMPT = """You are a senior commercial-contract lawyer producing a structured risk-rule library used by an AI contract-review system.
+SYSTEM_PROMPT = """You are an AI document specialist producing a structured pattern library used by an AI contract-reading system.
 
 Each rule describes a SPECIFIC clause-level risk that frequently appears in real contracts. The reviewer will match user contracts against these rules to flag problems.
 
