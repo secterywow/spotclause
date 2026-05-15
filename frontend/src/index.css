@@ -174,13 +174,6 @@ a:hover {
   transition: background var(--transition), border-color var(--transition);
 }
 
-/* Ensure navbar acts as positioning context for mobile menu */
-@media (max-width: 800px) {
-  .navbar {
-    position: fixed;
-  }
-}
-
 @supports not (backdrop-filter: blur(24px)) {
   .navbar {
     background: rgba(255, 255, 255, 0.92);
@@ -1179,13 +1172,14 @@ a:hover {
     position: absolute;
     top: var(--navbar-height);
     left: 0;
-    right: 0;
+    width: 100vw;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
     flex-direction: column;
-    padding: 8px;
+    padding: 8px 16px;
     gap: 4px;
     z-index: 99;
+    box-sizing: border-box;
   }
 
   .navbar-nav.open {
