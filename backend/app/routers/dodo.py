@@ -10,10 +10,52 @@ from app.models.payment import PendingPayment
 from app.utils.security import decode_access_token
 from app.logger import get_logger
 import os
+import hmac
+import hashlib
 
 settings = get_settings()
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/dodo", tags=["dodo"])
+
+
+# ---------------------------------------------------------------------------
+# Webhook signature verification helpers
+# ---------------------------------------------------------------------------
+
+def _verify_webhook_signature(body: bytes, headers: dict) -> bool:
+    """Verify Dodo Payments webhook signature using HMAC-SHA256.
+
+    Dodo sends the signature in the x-webhook-signature header.
+    If DODO_PAYMENTS_WEBHOOK_SECRET is not configured, we skip verification
+    but log a warning.
+    """
+    secret = settings.dodo_payments_webhook_secret
+    if not secret:
+        logger.warning("Webhook signature verification skipped: DODO_PAYMENTS_WEBHOOK_SECRET not set")
+        return True  # Allow through when not configured (so webhooks don't fail during setup)
+
+    signature = headers.get("x-webhook-signature") or headers.get("x-dodo-signature") or headers.get("webhook-signature")
+    if not signature:
+        logger.warning("Webhook missing signature header")
+        return False
+
+    expected = hmac.new(
+        secret.encode("utf-8"),
+        body,
+        hashlib.sha256,
+    ).hexdigest()
+
+    # Support both raw hex and v1,prefix formats
+    sig_parts = signature.split(",")
+    for part in sig_parts:
+        part = part.strip()
+        if part.startswith("v1="):
+            part = part[3:]
+        if hmac.compare_digest(expected, part):
+            return True
+
+    logger.warning("Webhook signature mismatch")
+    return False
 
 # Product ID mapping for Live mode
 # Standard monthly: pdt_0NesPfHczx0qkBIHmdNYp
@@ -122,16 +164,6 @@ def create_payment(
 # Webhook
 # ---------------------------------------------------------------------------
 
-async def _parse_webhook_payload(request: Request) -> dict:
-    """Safely read and parse the webhook body."""
-    body = await request.body()
-    import json
-    try:
-        return json.loads(body)
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Invalid JSON payload")
-
-
 def _extract_checkout_id(event: dict) -> str | None:
     """Try several common payload shapes to find a checkout/session id."""
     # Shape 1: payment.succeeded → data.object.checkout_session_id
@@ -211,7 +243,21 @@ def _upgrade_user_plan(db: Session, user_id: int, plan: str, billing_cycle: str)
 @router.post("/webhook")
 async def dodo_webhook(request: Request, db: Session = Depends(get_db)):
     """Handle Dodo Payments webhooks."""
-    event = await _parse_webhook_payload(request)
+    body = await request.body()
+
+    # Verify signature (skip if secret not configured)
+    if not _verify_webhook_signature(body, dict(request.headers)):
+        # During initial setup we log but still process; after DODO_PAYMENTS_WEBHOOK_SECRET
+        # is configured this will reject invalid signatures.
+        if settings.dodo_payments_webhook_secret:
+            raise HTTPException(status_code=401, detail="Invalid webhook signature")
+
+    import json
+    try:
+        event = json.loads(body)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
     event_type = event.get("type", "")
 
     logger.info("Dodo webhook received", event_type=event_type)

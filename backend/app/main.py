@@ -5,11 +5,15 @@ from app.config import get_settings
 from app.routers import auth, pricing, stripe, contract, follow_up, stats, admin, dodo
 from app.middleware.logging import LoggingMiddleware
 from app.logger import setup_logging
+from app.database import engine, Base
 
 settings = get_settings()
 
 # Setup structured logging
 setup_logging()
+
+# Auto-create tables on startup (no manual migration needed on Render free tier)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.app_name,
