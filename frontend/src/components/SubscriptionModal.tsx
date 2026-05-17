@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
+import { useToast } from '../hooks/useToast'
 
 interface PricingPlan {
   name: string
@@ -28,10 +29,12 @@ interface Props {
 
 export default function SubscriptionModal({ reason, onClose }: Props) {
   const { t } = useTranslation()
-  const { user: _user } = useAuth()
+  const { user } = useAuth()
+  const { showToast } = useToast()
   const [isYearly, setIsYearly] = useState(false)
   const [pricing, setPricing] = useState<PricingData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [payLoading, setPayLoading] = useState(false)
 
   useEffect(() => {
     api.get('/api/pricing/detect')
@@ -39,6 +42,35 @@ export default function SubscriptionModal({ reason, onClose }: Props) {
       .catch(() => setPricing(null))
       .finally(() => setLoading(false))
   }, [])
+
+  const handleUpgrade = async (planKey: string) => {
+    if (!user) {
+      showToast(t('common.loginFirst'), 'warning')
+      return
+    }
+    const productId = planKey === 'standard'
+      ? 'pdt_0Nf1qtj9AqAZJgu5xs0Ln'
+      : ''
+    if (!productId) {
+      showToast('Pro plan not available yet', 'warning')
+      return
+    }
+    try {
+      setPayLoading(true)
+      const res = await api.post('/api/dodo/create-payment', {
+        product_id: productId,
+        billing_cycle: isYearly ? 'yearly' : 'monthly',
+      })
+      const link = res.data.payment_link
+      if (link) {
+        window.open(link, '_blank')
+      }
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || 'Payment creation failed', 'error')
+    } finally {
+      setPayLoading(false)
+    }
+  }
 
   const formatPrice = (price: number, currency: string) => {
     if (price === 0) return '$0'
@@ -130,9 +162,10 @@ export default function SubscriptionModal({ reason, onClose }: Props) {
                   </ul>
                   <button
                     className="btn btn-primary"
-                    onClick={onClose}
+                    onClick={() => handleUpgrade(key)}
+                    disabled={payLoading}
                   >
-                    {t('pricing.upgrade')}
+                    {payLoading ? t('common.loading') : t('pricing.upgrade')}
                   </button>
                 </div>
               ))}

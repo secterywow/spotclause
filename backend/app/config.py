@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     stripe_secret_key: str = ""
     stripe_webhook_secret: str = ""
 
+    # Dodo Payments
+    dodo_payments_api_key: str = ""
+    dodo_payments_webhook_secret: str = ""
+
     # Google OAuth
     google_client_id: str = ""
     google_client_secret: str = ""
