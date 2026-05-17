@@ -5,9 +5,11 @@ from app.database import get_db
 from app.config import get_settings
 from app.models.user import User
 from app.utils.security import decode_access_token
+from app.logger import get_logger
 import os
 
 settings = get_settings()
+logger = get_logger(__name__)
 router = APIRouter(prefix="/api/dodo", tags=["dodo"])
 
 # Auth dependency: extract user from Bearer token
@@ -60,6 +62,7 @@ def create_payment(
     product_id = req.product_id
 
     try:
+        logger.info("Creating Dodo checkout session", product_id=product_id, user_email=current_user.email)
         session = client.checkout_sessions.create(
             product_cart=[
                 {
@@ -68,8 +71,10 @@ def create_payment(
                 }
             ],
         )
+        logger.info("Dodo checkout session created", checkout_url=session.checkout_url)
         return {"payment_link": session.checkout_url}
     except Exception as e:
+        logger.error("Failed to create Dodo checkout session", error=str(e), product_id=product_id)
         raise HTTPException(status_code=400, detail=f"Failed to create payment: {str(e)}")
 
 
