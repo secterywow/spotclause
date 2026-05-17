@@ -39,7 +39,8 @@ def get_dodo_client():
     if not settings.dodo_payments_api_key:
         raise HTTPException(status_code=500, detail="Dodo Payments API key not configured")
 
-    env = "test_mode" if settings.debug else "live_mode"
+    # Force test_mode for now until we switch to live
+    env = "test_mode"
     return DodoPayments(bearer_token=settings.dodo_payments_api_key, environment=env)
 
 
