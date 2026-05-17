@@ -4,11 +4,28 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.config import get_settings
 from app.models.user import User
-from app.utils.security import get_current_user
+from app.utils.security import decode_access_token
 import os
 
 settings = get_settings()
 router = APIRouter(prefix="/api/dodo", tags=["dodo"])
+
+# Auth dependency: extract user from Bearer token
+def get_current_user(
+    authorization: str = Header(None, alias="Authorization"),
+    db: Session = Depends(get_db),
+):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    token = authorization.split(" ", 1)[1]
+    payload = decode_access_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    user = db.query(User).filter(User.id == int(payload["sub"])).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
 
 # Lazy import to avoid startup error if SDK not installed
 def get_dodo_client():
