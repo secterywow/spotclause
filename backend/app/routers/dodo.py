@@ -43,19 +43,7 @@ def create_payment(
     product_id = req.product_id
 
     try:
-        payment = client.payments.create(
-            payment_link=True,
-            billing={
-                "city": "",
-                "country": "US",
-                "state": "",
-                "street": "",
-                "zipcode": 0,
-            },
-            customer={
-                "email": current_user.email,
-                "name": current_user.name or current_user.email,
-            },
+        session = client.checkout_sessions.create(
             product_cart=[
                 {
                     "product_id": product_id,
@@ -63,7 +51,7 @@ def create_payment(
                 }
             ],
         )
-        return {"payment_link": payment.payment_link}
+        return {"payment_link": session.checkout_url}
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to create payment: {str(e)}")
 
