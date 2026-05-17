@@ -262,7 +262,7 @@ async def dodo_webhook(request: Request, db: Session = Depends(get_db)):
 
     logger.info("Dodo webhook received", event_type=event_type)
 
-    if event_type in ("payment.succeeded", "subscription.created"):
+    if event_type in ("payment.succeeded", "subscription.active", "subscription.renewed"):
         checkout_id = _extract_checkout_id(event)
         customer_email = _extract_customer_email(event)
 
