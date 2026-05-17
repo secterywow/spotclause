@@ -12,6 +12,22 @@ settings = get_settings()
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/dodo", tags=["dodo"])
 
+# Product ID mapping for Live mode
+# Standard monthly: pdt_0NesPfHczx0qkBIHmdNYp
+# Standard yearly:  pdt_0Nf1qULHW39PsCeW4pER7
+# Pro monthly:      pdt_0Nf1qaixwqgs3Z6FMIE38
+# Pro yearly:       pdt_0Nf1qeKGi6aR7sUILOAN4
+PRODUCT_IDS = {
+    "standard": {
+        "monthly": "pdt_0NesPfHczx0qkBIHmdNYp",
+        "yearly": "pdt_0Nf1qULHW39PsCeW4pER7",
+    },
+    "pro": {
+        "monthly": "pdt_0Nf1qaixwqgs3Z6FMIE38",
+        "yearly": "pdt_0Nf1qeKGi6aR7sUILOAN4",
+    },
+}
+
 # Auth dependency: extract user from Bearer token
 def get_current_user(
     authorization: str = Header(None, alias="Authorization"),
@@ -39,13 +55,12 @@ def get_dodo_client():
     if not settings.dodo_payments_api_key:
         raise HTTPException(status_code=500, detail="Dodo Payments API key not configured")
 
-    # Force test_mode for now until we switch to live
-    env = "test_mode"
+    env = "test_mode" if settings.debug else "live_mode"
     return DodoPayments(bearer_token=settings.dodo_payments_api_key, environment=env)
 
 
 class CreatePaymentRequest(BaseModel):
-    product_id: str
+    plan: str  # standard or pro
     billing_cycle: str = "monthly"  # monthly or yearly
 
 
@@ -58,9 +73,12 @@ def create_payment(
     """Create a Dodo Payments checkout link for subscription."""
     client = get_dodo_client()
 
-    # Map product_id to Dodo product ID
-    # For now we only have one test product for Standard monthly
-    product_id = req.product_id
+    plan = req.plan.lower()
+    cycle = req.billing_cycle.lower()
+
+    product_id = PRODUCT_IDS.get(plan, {}).get(cycle)
+    if not product_id:
+        raise HTTPException(status_code=400, detail=f"Invalid plan or billing cycle: {plan}/{cycle}")
 
     try:
         logger.info("Creating Dodo checkout session", product_id=product_id, user_email=current_user.email)

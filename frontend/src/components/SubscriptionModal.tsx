@@ -48,17 +48,10 @@ export default function SubscriptionModal({ reason, onClose }: Props) {
       showToast(t('common.loginFirst'), 'warning')
       return
     }
-    const productId = planKey === 'standard'
-      ? 'pdt_0Nf1qtj9AqAZJgu5xs0Ln'
-      : ''
-    if (!productId) {
-      showToast('Pro plan not available yet', 'warning')
-      return
-    }
     try {
       setPayLoading(true)
       const res = await api.post('/api/dodo/create-payment', {
-        product_id: productId,
+        plan: planKey,
         billing_cycle: isYearly ? 'yearly' : 'monthly',
       })
       const link = res.data.payment_link
