@@ -351,6 +351,37 @@ def simulate_webhook(
     }
 
 
+# ---------------------------------------------------------------------------
+# One-time force-upgrade endpoint (remove after use)
+# ---------------------------------------------------------------------------
+
+@router.get("/force-upgrade")
+def force_upgrade(
+    email: str,
+    plan: str,
+    billing_cycle: str = "yearly",
+    token: str = "",
+    db: Session = Depends(get_db),
+):
+    """One-time endpoint to manually upgrade a user. Token changes daily."""
+    expected = f"spotclause-force-{datetime.now().strftime('%Y%m%d')}"
+    if token != expected:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    _upgrade_user_plan(db, user.id, plan, billing_cycle)
+
+    return {
+        "message": f"Upgraded {user.email} to {plan} ({billing_cycle})",
+        "user_id": user.id,
+        "plan": plan,
+        "billing_cycle": billing_cycle,
+    }
+
+
 @router.get("/my-subscription")
 def get_my_subscription(
     current_user: User = Depends(get_current_user),
