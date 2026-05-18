@@ -389,6 +389,15 @@ a:hover {
   width: 100%;
 }
 
+.sidebar-actions .language-switcher {
+  align-self: flex-start;
+}
+
+.sidebar-actions .language-switcher-dropdown {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
 .sidebar-actions-row {
   display: flex;
   align-items: center;
