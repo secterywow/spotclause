@@ -829,6 +829,25 @@ async def compare_contracts_endpoint(
 
 
 @router.get("/my")
+def _get_contract_status(record: ContractRecord) -> str | None:
+    """Determine display status for a contract record.
+
+    - None      → completed successfully (no status badge shown)
+    - 'pending' → analysis still running
+    - 'failed'  → analysis/comparison encountered an error
+    """
+    if record.report_json is None:
+        return "pending"
+    try:
+        parsed = json.loads(record.report_json)
+        if isinstance(parsed, dict) and parsed.get("error"):
+            return "failed"
+    except Exception:
+        pass
+    return None  # success → no badge
+
+
+@router.get("/my")
 def get_my_contracts(
     user_id: int,
     record_type: str = "",  # empty = all; 'analysis' | 'comparison'
@@ -866,6 +885,7 @@ def get_my_contracts(
                 "contract_type": r.contract_type,
                 "jurisdiction": r.jurisdiction,
                 "overall_score": r.overall_score,
+                "status": _get_contract_status(r),
                 "created_at": r.created_at,
             }
             for r in records

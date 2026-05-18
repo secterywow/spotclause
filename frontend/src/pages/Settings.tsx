@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
@@ -6,11 +6,25 @@ import { useTheme } from '../hooks/useTheme'
 import { useToast } from '../hooks/useToast'
 import { api } from '../lib/api'
 import LanguageSwitcher from '../components/LanguageSwitcher'
+import SubscriptionModal from '../components/SubscriptionModal'
 
 const PLAN_LABEL: Record<string, string> = {
   free: 'plans.free',
   standard: 'plans.standard',
   pro: 'plans.pro',
+}
+
+interface UsageInfo {
+  limit: number
+  used: number
+  remaining: number
+}
+
+interface UsageData {
+  plan: string
+  month: string
+  analyze: UsageInfo
+  compare: UsageInfo
 }
 
 export default function Settings() {
@@ -22,6 +36,15 @@ export default function Settings() {
 
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [usage, setUsage] = useState<UsageData | null>(null)
+  const [showSubModal, setShowSubModal] = useState(false)
+
+  useEffect(() => {
+    if (!user) return
+    api.get(`/api/contracts/usage/${user.id}`)
+      .then(res => setUsage(res.data))
+      .catch(() => setUsage(null))
+  }, [user])
 
   if (!user) return null
 
@@ -76,35 +99,65 @@ export default function Settings() {
         </div>
       </section>
 
-      {/* Subscription */}
-      <section className="settings-card">
-        <div className="settings-card-head">
-          <h3>{t('settings.subscription')}</h3>
-        </div>
-        <div className="settings-row">
-          <div className="row-text">
-            <div className="row-title">{t('settings.currentPlan')}</div>
-            <div className="row-desc">
-              {isFree ? t('settings.freeDesc') : t('settings.paidDesc', { plan: t(planKey) })}
+      {/* Usage Stats */}
+      {usage && (
+        <section className="settings-card">
+          <div className="settings-card-head">
+            <h3>{t('settings.usageStats')}</h3>
+          </div>
+          <div className="settings-usage">
+            <div className="usage-row">
+              <div className="usage-label">{t('settings.analyzeUsage')}</div>
+              <div className="usage-bar-wrap">
+                <div
+                  className="usage-bar"
+                  style={{
+                    width: `${usage.analyze.limit > 0 ? (usage.analyze.used / usage.analyze.limit) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+              <div className="usage-text">
+                {usage.analyze.used} / {usage.analyze.limit}
+              </div>
+            </div>
+            <div className="usage-row">
+              <div className="usage-label">{t('settings.compareUsage')}</div>
+              <div className="usage-bar-wrap">
+                <div
+                  className="usage-bar"
+                  style={{
+                    width: `${usage.compare.limit > 0 ? (usage.compare.used / usage.compare.limit) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+              <div className="usage-text">
+                {usage.compare.used} / {usage.compare.limit}
+              </div>
             </div>
           </div>
-          <button
-            className={`btn ${isFree ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => navigate('/pricing')}
-          >
-            {isFree ? t('settings.upgrade') : t('settings.managePlan')}
-          </button>
-        </div>
-        <div className="settings-row">
-          <div className="row-text">
-            <div className="row-title">{t('settings.usageHistory')}</div>
-            <div className="row-desc">{t('settings.usageHistoryDesc')}</div>
+        </section>
+      )}
+
+      {/* Subscription */}
+      {isFree && (
+        <section className="settings-card">
+          <div className="settings-card-head">
+            <h3>{t('settings.subscription')}</h3>
           </div>
-          <button className="btn btn-ghost" onClick={() => navigate('/contracts')}>
-            {t('settings.viewHistory')}
-          </button>
-        </div>
-      </section>
+          <div className="settings-row">
+            <div className="row-text">
+              <div className="row-title">{t('settings.currentPlan')}</div>
+              <div className="row-desc">{t('settings.freeDesc')}</div>
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={() => setShowSubModal(true)}
+            >
+              {t('settings.upgrade')}
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Preferences */}
       <section className="settings-card">
@@ -188,6 +241,13 @@ export default function Settings() {
           </div>
         </div>
       </section>
+
+      {showSubModal && (
+        <SubscriptionModal
+          reason={t('settings.upgradePrompt')}
+          onClose={() => setShowSubModal(false)}
+        />
+      )}
     </div>
   )
 }

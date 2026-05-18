@@ -11,6 +11,7 @@ interface Contract {
   record_type: string
   contract_type: string
   jurisdiction: string
+  status: string | null
   created_at: string
 }
 
@@ -21,6 +22,13 @@ interface TypeCounts {
 }
 
 type FilterType = 'all' | 'analysis' | 'comparison'
+
+const StatusBadge = ({ status }: { status: string | null }) => {
+  if (!status) return null
+  const cls = `contract-status status-${status}`
+  const label = status === 'pending' ? 'Analyzing...' : status === 'failed' ? 'Failed' : ''
+  return <span className={cls}>{label}</span>
+}
 
 export default function Contracts() {
   const { t } = useTranslation()
@@ -145,6 +153,7 @@ export default function Contracts() {
                     </span>
                     <span>{contract.contract_type || t('contracts.unknownType')}</span>
                     <span>{contract.jurisdiction || t('contracts.unknownJurisdiction')}</span>
+                    <StatusBadge status={contract.status} />
                   </div>
                 </div>
                 <div className="contract-actions">

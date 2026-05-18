@@ -250,7 +250,10 @@
     "account": "Account",
     "supportEmail": "Support: javuxitedo792@gmail.com",
     "currentUsage": "Current Usage",
-    "upgradePrompt": "Upgrade to unlock more features"
+    "upgradePrompt": "Upgrade to unlock more features",
+    "usageStats": "Usage This Month",
+    "analyzeUsage": "Contract Review",
+    "compareUsage": "Contract Compare"
   },
   "seo": {
     "featuresTitle": "Why SpotClause",

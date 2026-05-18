@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '../hooks/useAuth'
 import ThemeToggle from './ThemeToggle'
 import LanguageSwitcher from './LanguageSwitcher'
 import SubscriptionModal from './SubscriptionModal'
@@ -71,11 +72,11 @@ const DiamondIcon = () => (
         <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
       </linearGradient>
     </defs>
-    {/* Top facets — wider crown so the diamond reads as a brilliant cut, not a long shard */}
+    {/* Top facets */}
     <polygon points="6,24 18,12 46,12 58,24 32,24" fill="url(#diamond-top)" stroke="#b45309" strokeWidth="0.6" />
     <polygon points="18,12 32,24 32,12" fill="#fde68a" stroke="#b45309" strokeWidth="0.6" />
     <polygon points="32,12 32,24 46,12" fill="#fcd34d" stroke="#b45309" strokeWidth="0.6" />
-    {/* Bottom facets — shorter pavilion so the apex doesn't elongate the silhouette */}
+    {/* Bottom facets */}
     <polygon points="6,24 32,24 32,52" fill="url(#diamond-left)" stroke="#9a3412" strokeWidth="0.6" />
     <polygon points="32,24 58,24 32,52" fill="url(#diamond-right)" stroke="#9a3412" strokeWidth="0.6" />
     {/* Inner facet lines */}
@@ -88,7 +89,10 @@ const DiamondIcon = () => (
 
 export default function Sidebar({ onLogout }: SidebarProps) {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [showSubModal, setShowSubModal] = useState(false)
+
+  const isFree = user?.plan === 'free'
 
   const menuItems = [
     { path: '/', label: t('nav.review'), Icon: ReviewIcon },
@@ -120,14 +124,16 @@ export default function Sidebar({ onLogout }: SidebarProps) {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="upgrade-card">
-          <span className="upgrade-icon"><DiamondIcon /></span>
-          <p className="upgrade-text">Upgrade</p>
-          <p className="upgrade-sub">{t('settings.upgradePrompt')}</p>
-          <button className="btn btn-outline btn-sm" onClick={() => setShowSubModal(true)}>
-            Upgrade
-          </button>
-        </div>
+        {isFree && (
+          <div className="upgrade-card">
+            <span className="upgrade-icon"><DiamondIcon /></span>
+            <p className="upgrade-text">Upgrade</p>
+            <p className="upgrade-sub">{t('settings.upgradePrompt')}</p>
+            <button className="btn btn-outline btn-sm" onClick={() => setShowSubModal(true)}>
+              Upgrade
+            </button>
+          </div>
+        )}
         <div className="sidebar-actions">
           <LanguageSwitcher />
           <div className="sidebar-actions-row">

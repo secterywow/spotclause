@@ -250,7 +250,10 @@
     "account": "帳戶",
     "supportEmail": "支援:javuxitedo792@gmail.com",
     "currentUsage": "當前用量",
-    "upgradePrompt": "升級以解鎖更多功能"
+    "upgradePrompt": "升級以解鎖更多功能",
+    "usageStats": "本月用量",
+    "analyzeUsage": "合同审查",
+    "compareUsage": "合同对比"
   },
   "seo": {
     "featuresTitle": "為什麼選 SpotClause",
