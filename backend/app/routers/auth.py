@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Header, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas.user import UserCreate, UserLogin, GoogleLogin, Token, EmailVerify
@@ -158,7 +158,14 @@ def confirm_verification_code(data: EmailVerify, db: Session = Depends(get_db)):
 
 
 @router.get("/me")
-def get_current_user(token: str, db: Session = Depends(get_db)):
+def get_me(
+    authorization: str = Header(None, alias="Authorization"),
+    db: Session = Depends(get_db),
+):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+
+    token = authorization.split(" ", 1)[1]
     payload = decode_access_token(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid token")

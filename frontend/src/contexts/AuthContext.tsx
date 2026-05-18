@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+import { api } from '../lib/api'
 
 export interface User {
   id: number
@@ -45,7 +46,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         localStorage.removeItem(TOKEN_KEY)
         localStorage.removeItem(USER_KEY)
+        return
       }
+      // Refresh user data from server (plan may have changed)
+      api.get('/api/auth/me')
+        .then(res => {
+          const freshUser = res.data as User
+          setUser(freshUser)
+          localStorage.setItem(USER_KEY, JSON.stringify(freshUser))
+        })
+        .catch(() => {
+          // Token invalid — api interceptor handles cleanup + reload
+        })
     }
   }, [])
 
