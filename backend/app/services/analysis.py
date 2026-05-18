@@ -702,6 +702,9 @@ def extract_structure_pass(text: str, jurisdiction: str) -> Dict:
             'category': str(c.get('category') or 'general'),
         })
 
+    if not clauses:
+        raise ValueError("Structure pass returned no valid clauses")
+
     return {'contractType': contract_type, 'clauses': clauses}
 
 

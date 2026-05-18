@@ -173,6 +173,9 @@ export default function Home() {
         } catch {
           return
         }
+        // DEBUG: log every SSE event to browser console
+        // eslint-disable-next-line no-console
+        console.log('[SSE]', evt.type, evt)
         switch (evt.type) {
           case 'phase': {
             const step = PHASE_TO_STEP[evt.name] ?? progress.step
@@ -231,7 +234,8 @@ export default function Home() {
         if (pollTimerRef.current) {
           clearInterval(pollTimerRef.current)
         }
-        setProgress({ step: 4, stepName: t('home.step4') })
+        // Keep the current progress label instead of jumping to step 4 so the
+        // user still sees the last known step (e.g. "Reviewing clause 3/5...")
         pollTimerRef.current = setInterval(async () => {
           try {
             const statusRes = await api.get(`/api/contracts/analyze/${contract_record_id}/status`)

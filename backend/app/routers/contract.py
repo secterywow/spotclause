@@ -659,6 +659,9 @@ async def analyze_stream(contract_record_id: int, db: Session = Depends(get_db))
             if evt_type == "__close__":
                 return
             yield f"data: {json.dumps(evt, ensure_ascii=False)}\n\n"
+            # Tiny flush delay helps proxies (Cloudflare, Render) emit the
+            # chunk immediately instead of buffering small frames together.
+            await asyncio.sleep(0.05)
             if evt_type in {"complete", "error"}:
                 return
 
@@ -667,8 +670,9 @@ async def analyze_stream(contract_record_id: int, db: Session = Depends(get_db))
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache, no-transform",
-            "X-Accel-Buffering": "no",  # disable nginx buffering if proxied
+            "X-Accel-Buffering": "no",
             "Connection": "keep-alive",
+            "Content-Type": "text/event-stream",
         },
     )
 
