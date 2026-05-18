@@ -394,10 +394,14 @@ function phaseLabel(name: string, t: (k: string, opts?: any) => string, total = 
 
 function AnalysisProgress({ progress }: { progress: { step: number; stepName: string } }) {
   const { t } = useTranslation()
+  const step3Ref = useRef(t('home.step3', { current: 0, total: 0 }))
+  if (progress.step === 3 && progress.stepName) {
+    step3Ref.current = progress.stepName
+  }
   const steps = [
     t('home.step1'),
     t('home.step2'),
-    progress.step === 3 && progress.stepName ? progress.stepName : t('home.step3', { current: 0, total: 0 }),
+    step3Ref.current,
     t('home.step4'),
   ]
 
