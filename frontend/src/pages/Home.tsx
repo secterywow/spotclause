@@ -234,7 +234,7 @@ export default function Home() {
         setProgress({ step: 4, stepName: t('home.step4') })
         pollTimerRef.current = setInterval(async () => {
           try {
-            const statusRes = await api.get(`/api/contracts/${contract_record_id}/status`)
+            const statusRes = await api.get(`/api/contracts/analyze/${contract_record_id}/status`)
             const data = statusRes.data
             if (data.report) {
               if (pollTimerRef.current) {
