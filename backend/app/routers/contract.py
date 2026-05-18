@@ -829,7 +829,6 @@ async def compare_contracts_endpoint(
     }
 
 
-@router.get("/my")
 def _get_contract_status(record: ContractRecord) -> Optional[str]:
     """Determine display status for a contract record.
 
