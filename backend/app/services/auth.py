@@ -109,6 +109,10 @@ def generate_email_code(email: str) -> str:
       <p style="color: #999; font-size: 13px;">
         If you didn't request this, you can safely ignore this email.
       </p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+      <p style="color: #999; font-size: 12px;">
+        Can't find this email? Please check your spam/junk folder.
+      </p>
     </div>
     """
     sent = _send_email_via_resend(email, subject, html)

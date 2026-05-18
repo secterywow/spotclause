@@ -36,10 +36,11 @@ def _verify_google_token(token: str) -> dict:
 
 @router.post("/register", response_model=Token)
 def register(user_data: UserCreate, db: Session = Depends(get_db)):
-    # Check if email already exists
     from app.models.user import User
     existing = db.query(User).filter(User.email == user_data.email).first()
-    if existing:
+
+    # If email exists and is already verified, reject
+    if existing and existing.email_verified:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     # Verify the email verification code
@@ -48,8 +49,18 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     if not verify_email_code(user_data.email, user_data.code):
         raise HTTPException(status_code=400, detail="Invalid or expired verification code")
 
+    if existing and not existing.email_verified:
+        # Re-use the unverified account: update password and mark verified
+        from app.utils.security import get_password_hash
+        existing.name = user_data.name or existing.name
+        existing.password_hash = get_password_hash(user_data.password)
+        existing.email_verified = True
+        db.commit()
+        db.refresh(existing)
+        token = create_token_for_user(existing)
+        return {"access_token": token, "token_type": "bearer", "user": existing}
+
     user = create_user(db, user_data)
-    # Mark as verified since we just checked the code
     user.email_verified = True
     db.commit()
     token = create_token_for_user(user)
@@ -120,10 +131,15 @@ def get_google_config():
 
 
 @router.post("/verify-email/send")
-def send_verification_code(email: str):
+def send_verification_code(email: str, db: Session = Depends(get_db)):
+    from app.models.user import User
+    existing = db.query(User).filter(User.email == email).first()
+
+    # If already registered and verified, don't send code
+    if existing and existing.email_verified:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
     code = generate_email_code(email)
-    # TODO: Send email with code
-    # For development, return the code directly
     if settings.debug:
         return {"message": "Verification code sent", "code": code}
     return {"message": "Verification code sent"}

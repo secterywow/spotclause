@@ -6,7 +6,13 @@ from app.config import get_settings
 
 settings = get_settings()
 
-engine = create_engine(settings.database_url)
+# pool_pre_ping: verify connections before use (fixes "SSL connection has been closed")
+# pool_recycle: recycle connections every 5 min (fixes Render free tier idle timeout)
+engine = create_engine(
+    settings.database_url,
+    pool_pre_ping=True,
+    pool_recycle=300,
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
