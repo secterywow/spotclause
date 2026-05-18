@@ -53,11 +53,21 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
         ContractRecord.high_risk_count > 0
     ).scalar() or 0
 
-    # Average score
-    avg_score = db.query(func.avg(ContractRecord.overall_score)).filter(
+    # Total worsened clauses across all comparison reports
+    import json as _json
+    comparison_records = db.query(ContractRecord).filter(
         ContractRecord.user_id == user_id,
-        ContractRecord.overall_score.is_not(None)
-    ).scalar() or 0
+        ContractRecord.record_type == "comparison"
+    ).all()
+    total_worsened = 0
+    for rec in comparison_records:
+        if rec.report_json:
+            try:
+                rep = _json.loads(rec.report_json)
+                bd = rep.get("breakdown") or {}
+                total_worsened += bd.get("worsened", 0)
+            except Exception:
+                pass
 
     # Last analyze time
     last_record = db.query(ContractRecord).filter(
@@ -78,7 +88,7 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db)):
         "totalAnalyzes": total,
         "thisWeekChange": this_week,
         "highRiskFound": high_risk,
-        "averageRiskScore": round(float(avg_score)) if avg_score else 0,
+        "totalWorsened": total_worsened,
         "lastAnalyzeTime": get_time_label(last_record.created_at) if last_record else "Never",
         "riskTypeDistribution": [
             {

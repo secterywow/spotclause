@@ -7,7 +7,7 @@ interface UserStats {
   totalAnalyzes: number
   thisWeekChange: number
   highRiskFound: number
-  averageRiskScore: number
+  totalWorsened: number
   lastAnalyzeTime: string
   riskTypeDistribution: { category: string; count: number; percentage: number }[]
 }
@@ -100,8 +100,8 @@ export default function StatsPanel() {
           <span className="stat-value">{stats.highRiskFound}</span>
         </div>
         <div className="stat-card">
-          <span className="stat-label">{t('stats.averageRiskScore')}</span>
-          <span className="stat-value">{stats.averageRiskScore || '—'}</span>
+          <span className="stat-label">{t('stats.worsenedCount')}</span>
+          <span className="stat-value">{stats.totalWorsened || '—'}</span>
         </div>
         <div className="stat-card">
           <span className="stat-label">{t('stats.lastAnalyze')}</span>

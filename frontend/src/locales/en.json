@@ -329,7 +329,7 @@
     "totalAnalyzes": "Total read",
     "thisWeek": "this week",
     "highRiskFound": "Important items found",
-    "averageRiskScore": "Avg. overview score",
+    "worsenedCount": "Worsened times",
     "lastAnalyze": "Last reading",
     "distributionTitle": "Document type breakdown",
     "noData": "No readings yet — your first reading will appear here."

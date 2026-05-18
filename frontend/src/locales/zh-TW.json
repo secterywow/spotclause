@@ -329,7 +329,7 @@
     "totalAnalyzes": "閱讀總數",
     "thisWeek": "本週",
     "highRiskFound": "重要發現",
-    "averageRiskScore": "平均概覽分數",
+    "worsenedCount": "惡化次數",
     "lastAnalyze": "上次閱讀",
     "distributionTitle": "文件類型分佈",
     "noData": "尚無閱讀記錄 — 你的第一份閱讀將顯示在此。"
