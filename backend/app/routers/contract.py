@@ -15,6 +15,7 @@ import queue
 import threading
 import time
 import urllib.parse
+from typing import Optional
 
 settings = get_settings()
 logger = get_logger(__name__)
@@ -829,7 +830,7 @@ async def compare_contracts_endpoint(
 
 
 @router.get("/my")
-def _get_contract_status(record: ContractRecord) -> str | None:
+def _get_contract_status(record: ContractRecord) -> Optional[str]:
     """Determine display status for a contract record.
 
     - None      → completed successfully (no status badge shown)

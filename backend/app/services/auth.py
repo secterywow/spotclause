@@ -1,4 +1,5 @@
 import time
+from typing import Optional
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate, UserLogin
@@ -30,7 +31,7 @@ def create_user(db: Session, user_data: UserCreate) -> User:
     return db_user
 
 
-def authenticate_user(db: Session, login_data: UserLogin) -> User | None:
+def authenticate_user(db: Session, login_data: UserLogin) -> Optional[User]:
     user = db.query(User).filter(User.email == login_data.email).first()
     if not user:
         return None
@@ -63,7 +64,7 @@ def _send_email_via_resend(to: str, subject: str, html_body: str) -> bool:
         return False
 
 
-def get_or_create_google_user(db: Session, google_id: str, email: str, name: str | None, avatar: str | None) -> User:
+def get_or_create_google_user(db: Session, google_id: str, email: str, name: Optional[str], avatar: Optional[str]) -> User:
     user = db.query(User).filter(User.google_id == google_id).first()
     if user:
         return user
@@ -135,7 +136,7 @@ def verify_email_code(email: str, code: str) -> bool:
     return False
 
 
-def get_user_by_id(db: Session, user_id: int) -> User | None:
+def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
 
 

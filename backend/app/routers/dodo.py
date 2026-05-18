@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 from app.database import get_db
 from app.config import get_settings
 from app.models.user import User
@@ -164,7 +165,7 @@ def create_payment(
 # Webhook
 # ---------------------------------------------------------------------------
 
-def _extract_checkout_id(event: dict) -> str | None:
+def _extract_checkout_id(event: dict) -> Optional[str]:
     """Try several common payload shapes to find a checkout/session id."""
     # Shape 1: payment.succeeded → data.object.checkout_session_id
     data = event.get("data", {}).get("object", {})
@@ -181,7 +182,7 @@ def _extract_checkout_id(event: dict) -> str | None:
     return None
 
 
-def _extract_customer_email(event: dict) -> str | None:
+def _extract_customer_email(event: dict) -> Optional[str]:
     """Extract customer email from the webhook payload."""
     data = event.get("data", {}).get("object", {})
     customer = data.get("customer", {})
