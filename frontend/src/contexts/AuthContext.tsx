@@ -14,6 +14,7 @@ interface AuthContextType {
   user: User | null
   isLoggedIn: boolean
   isAdmin: boolean
+  isReady: boolean
   showLogin: boolean
   setShowLogin: (show: boolean) => void
   login: (token: string, user: User) => void
@@ -24,6 +25,7 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoggedIn: false,
   isAdmin: false,
+  isReady: false,
   showLogin: false,
   setShowLogin: () => {},
   login: () => {},
@@ -36,6 +38,7 @@ const USER_KEY = 'spotclause-user'
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [showLogin, setShowLogin] = useState(false)
+  const [isReady, setIsReady] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY)
@@ -46,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch {
         localStorage.removeItem(TOKEN_KEY)
         localStorage.removeItem(USER_KEY)
+        setIsReady(true)
         return
       }
       // Refresh user data from server (plan may have changed)
@@ -58,6 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .catch(() => {
           // Token invalid — api interceptor handles cleanup + reload
         })
+        .finally(() => {
+          setIsReady(true)
+        })
+    } else {
+      setIsReady(true)
     }
   }, [])
 
@@ -78,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = user?.role === 'admin'
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, isAdmin, showLogin, setShowLogin, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, isAdmin, isReady, showLogin, setShowLogin, login, logout }}>
       {children}
     </AuthContext.Provider>
   )

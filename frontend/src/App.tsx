@@ -26,7 +26,7 @@ import { supportedLanguages } from './i18n'
 
 function AppContent() {
   const { t, i18n } = useTranslation()
-  const { isLoggedIn, login, logout, showLogin, setShowLogin } = useAuth()
+  const { isLoggedIn, isReady, login, logout, showLogin, setShowLogin } = useAuth()
   const { showToast } = useToast()
   const [loginMode, setLoginMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
@@ -240,6 +240,14 @@ function AppContent() {
     resetForm()
     setLoginMode('register')
     setShowLogin(true)
+  }
+
+  if (!isReady) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+        <div className="progress-spinner" />
+      </div>
+    )
   }
 
   return (
