@@ -26,7 +26,7 @@ import { supportedLanguages } from './i18n'
 
 function AppContent() {
   const { t, i18n } = useTranslation()
-  const { isLoggedIn, isAdmin, login, logout, showLogin, setShowLogin } = useAuth()
+  const { isLoggedIn, login, logout, showLogin, setShowLogin } = useAuth()
   const { showToast } = useToast()
   const [loginMode, setLoginMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
@@ -253,7 +253,7 @@ function AppContent() {
             <Route path="/contracts" element={<Contracts />} />
             <Route path="/contracts/:id" element={<ContractReport />} />
             <Route path="/settings" element={<Settings />} />
-            {isAdmin && <Route path="/admin" element={<Admin />} />}
+            <Route path="/admin" element={<Admin />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/refund" element={<RefundPolicy />} />
