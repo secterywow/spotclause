@@ -3736,12 +3736,10 @@ a:hover {
   padding: 0;
 }
 
-/* --- Floating top action bar (glass card pinned 12px from top) --- */
+/* --- Floating top action bar (solid card pinned 12px from top) --- */
 .report-topbar {
   position: fixed;
   top: 12px;
-  /* Offset by the sidebar so the bar centers within the content area, not
-     under the sidebar. On mobile (sidebar hidden), this is reset below. */
   left: calc(var(--sidebar-width) + 16px);
   right: 16px;
   margin: 0 auto;
@@ -3750,54 +3748,15 @@ a:hover {
   max-width: 1168px;
   padding: 10px 18px;
   border-radius: 16px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.35);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.5) inset,
-    0 8px 28px rgba(15, 23, 42, 0.10),
-    0 2px 8px rgba(15, 23, 42, 0.06);
-  /* Glass blur applied on ::before so it works reliably on a fixed element. */
-  isolation: isolate;
-}
-
-.report-topbar::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: rgba(255,255,255,0.45);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  z-index: -1;
-}
-
-@supports not (backdrop-filter: blur(30px)) {
-  .report-topbar::before {
-    background: rgba(255,255,255,0.92);
-  }
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-lg);
 }
 
 @media (max-width: 768px) {
   .report-topbar {
     left: 16px;
     right: 16px;
-  }
-}
-
-[data-theme="dark"] .report-topbar::before {
-  background: rgba(15,18,22,0.55);
-}
-
-[data-theme="dark"] .report-topbar {
-  border-color: rgba(255,255,255,0.10);
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.06) inset,
-    0 10px 32px rgba(0,0,0,0.45);
-}
-
-@supports not (backdrop-filter: blur(30px)) {
-  [data-theme="dark"] .report-topbar::before {
-    background: rgba(13,13,13,0.92);
   }
 }
 
