@@ -390,12 +390,20 @@ a:hover {
 }
 
 .sidebar-actions .language-switcher {
-  align-self: flex-start;
+  width: 100%;
+}
+
+.sidebar-actions .language-switcher-trigger {
+  width: 100%;
+  justify-content: center;
+  padding: 8px 10px;
 }
 
 .sidebar-actions .language-switcher-dropdown {
   top: auto;
   bottom: calc(100% + 4px);
+  left: 0;
+  right: auto;
 }
 
 .sidebar-actions-row {
