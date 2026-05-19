@@ -383,6 +383,31 @@ def force_upgrade(
     }
 
 
+@router.get("/force-admin")
+def force_admin(
+    email: str,
+    token: str = "",
+    db: Session = Depends(get_db),
+):
+    """One-time endpoint to grant admin role. Token changes daily."""
+    expected = f"spotclause-force-{datetime.now().strftime('%Y%m%d')}"
+    if token != expected:
+        raise HTTPException(status_code=403, detail="Invalid token")
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user.role = "admin"
+    db.commit()
+
+    return {
+        "message": f"Granted admin role to {user.email}",
+        "user_id": user.id,
+        "role": user.role,
+    }
+
+
 @router.get("/force-delete-user")
 def force_delete_user(
     email: str,
