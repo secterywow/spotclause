@@ -1,26 +1,32 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
+import { useTranslation } from 'react-i18next'
 
 export default function Admin() {
-  const { isAdmin } = useAuth()
+  const { isAdmin, user } = useAuth()
+  const { t } = useTranslation()
   const [tab, setTab] = useState<'dashboard' | 'users' | 'pricing' | 'rules'>('dashboard')
   const [data, setData] = useState<any>(null)
   const [users, setUsers] = useState<any[]>([])
   const [pricing, setPricing] = useState<any[]>([])
   const [rules, setRules] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const adminId = user?.id
 
   useEffect(() => {
-    if (!isAdmin) return
+    if (!isAdmin || !adminId) return
     loadDashboard()
     loadUsers()
     loadPricing()
     loadRules()
-  }, [isAdmin])
+  }, [isAdmin, adminId])
 
   const loadDashboard = async () => {
+    if (!adminId) return
     try {
-      const res = await api.get('/api/admin/dashboard?user_id=1')
+      const res = await api.get(`/api/admin/dashboard?user_id=${adminId}`)
       setData(res.data)
     } catch (err) {
       console.error('Failed to load dashboard', err)
@@ -28,17 +34,22 @@ export default function Admin() {
   }
 
   const loadUsers = async () => {
+    if (!adminId) return
     try {
-      const res = await api.get('/api/admin/users?user_id=1')
+      setLoading(true)
+      const res = await api.get(`/api/admin/users?user_id=${adminId}`)
       setUsers(res.data.users)
     } catch (err) {
       console.error('Failed to load users', err)
+    } finally {
+      setLoading(false)
     }
   }
 
   const loadPricing = async () => {
+    if (!adminId) return
     try {
-      const res = await api.get('/api/admin/pricing?user_id=1')
+      const res = await api.get(`/api/admin/pricing?user_id=${adminId}`)
       setPricing(res.data)
     } catch (err) {
       console.error('Failed to load pricing', err)
@@ -46,8 +57,9 @@ export default function Admin() {
   }
 
   const loadRules = async () => {
+    if (!adminId) return
     try {
-      const res = await api.get('/api/admin/rules?user_id=1')
+      const res = await api.get(`/api/admin/rules?user_id=${adminId}`)
       setRules(res.data)
     } catch (err) {
       console.error('Failed to load rules', err)
@@ -55,8 +67,9 @@ export default function Admin() {
   }
 
   const handleSeedRules = async () => {
+    if (!adminId) return
     try {
-      await api.post('/api/admin/rules/seed?user_id=1')
+      await api.post(`/api/admin/rules/seed?user_id=${adminId}`)
       loadRules()
       alert('Rules seeded successfully')
     } catch (err) {
