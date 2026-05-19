@@ -102,6 +102,7 @@ function AppContent() {
       if (window.google?.accounts?.id) {
         window.google.accounts.id.initialize({
           client_id: clientId,
+          use_fedcm_for_prompt: false,
           callback: (response: { credential?: string }) => {
             if (response.credential) {
               handleGoogleCredential(response.credential)
