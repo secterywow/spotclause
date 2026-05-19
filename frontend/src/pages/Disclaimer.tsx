@@ -1,6 +1,13 @@
+import { Helmet } from 'react-helmet-async'
+
 export default function Disclaimer() {
   return (
     <div className="page legal-page">
+      <Helmet>
+        <title>Disclaimer - SpotClause</title>
+        <meta name="description" content="SpotClause disclaimer. Our AI-generated analysis is for informational purposes only and does not constitute professional advice." />
+        <link rel="canonical" href="https://spotclause.app/disclaimer" />
+      </Helmet>
       <h1>Disclaimer</h1>
       <p>
         SpotClause AI is a software application. The output

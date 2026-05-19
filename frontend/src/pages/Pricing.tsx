@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Helmet } from 'react-helmet-async'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
@@ -68,13 +69,24 @@ export default function Pricing() {
   if (loading) {
     return (
       <div className="page pricing-page">
+        <Helmet>
+          <title>Pricing Plans - SpotClause</title>
+          <meta name="description" content="Free, Standard, and Pro plans for AI contract analysis. Choose the plan that fits your needs." />
+          <link rel="canonical" href="https://spotclause.app/pricing" />
+        </Helmet>
         <div className="pricing-loading">{t('common.loading')}</div>
       </div>
     )
   }
 
   return (
-    <div className="page pricing-page">
+    <>
+      <Helmet>
+        <title>Pricing Plans - SpotClause</title>
+        <meta name="description" content="Free, Standard, and Pro plans for AI contract analysis. Choose the plan that fits your needs." />
+        <link rel="canonical" href="https://spotclause.app/pricing" />
+      </Helmet>
+      <div className="page pricing-page">
       <div className="pricing-header">
         <h1>{t('pricing.title')}</h1>
         <p className="pricing-subtitle">{t('pricing.subtitle')}</p>
@@ -169,5 +181,6 @@ export default function Pricing() {
         ))}
       </div>
     </div>
+  </>
   )
 }

@@ -204,6 +204,9 @@ export default function Compare() {
   return (
     <>
       <Helmet>
+        <title>Contract Comparison Tool - SpotClause</title>
+        <meta name="description" content="Compare two contract versions side by side with AI. Identify changes, added risks, and unfair clauses automatically." />
+        <link rel="canonical" href="https://spotclause.app/compare" />
         <meta property="og:title" content="SpotClause - Compare Contracts" />
         <meta property="og:description" content="Compare two contract versions and spot every change with AI." />
         <meta property="og:image" content="https://spotclause.app/og-compare.jpg" />

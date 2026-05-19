@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { api } from '../lib/api'
-import { useTranslation } from 'react-i18next'
 
 export default function Admin() {
   const { isAdmin, user } = useAuth()
-  const { t } = useTranslation()
   const [tab, setTab] = useState<'dashboard' | 'users' | 'pricing' | 'rules'>('dashboard')
   const [data, setData] = useState<any>(null)
   const [users, setUsers] = useState<any[]>([])
   const [pricing, setPricing] = useState<any[]>([])
   const [rules, setRules] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
 
   const adminId = user?.id
 
@@ -36,13 +33,10 @@ export default function Admin() {
   const loadUsers = async () => {
     if (!adminId) return
     try {
-      setLoading(true)
       const res = await api.get(`/api/admin/users?user_id=${adminId}`)
       setUsers(res.data.users)
     } catch (err) {
       console.error('Failed to load users', err)
-    } finally {
-      setLoading(false)
     }
   }
 

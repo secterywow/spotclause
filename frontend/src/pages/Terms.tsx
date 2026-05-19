@@ -1,6 +1,13 @@
+import { Helmet } from 'react-helmet-async'
+
 export default function Terms() {
   return (
     <div className="page legal-page">
+      <Helmet>
+        <title>Terms of Service - SpotClause</title>
+        <meta name="description" content="SpotClause terms of service. Read the rules and guidelines for using our AI contract analysis platform." />
+        <link rel="canonical" href="https://spotclause.app/terms" />
+      </Helmet>
       <div className="legal-container">
         <h1>Terms of Service</h1>
         <p className="legal-updated">Last updated: May 14, 2025</p>

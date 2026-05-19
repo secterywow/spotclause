@@ -296,6 +296,9 @@ export default function Home() {
   return (
     <>
       <Helmet>
+        <title>SpotClause - AI Contract Reader | Free Contract Analysis Tool</title>
+        <meta name="description" content="AI-powered contract reading for freelancers and small businesses. Spot unfair clauses, compare contract versions, and understand what you're signing before you sign." />
+        <link rel="canonical" href="https://spotclause.app" />
         <meta property="og:title" content="SpotClause - AI Contract Reader" />
         <meta property="og:description" content="AI-powered contract reading for freelancers and small businesses. Spot key clauses before you sign." />
         <meta property="og:image" content="https://spotclause.app/og-review.jpg" />

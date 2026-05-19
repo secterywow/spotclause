@@ -1,6 +1,13 @@
+import { Helmet } from 'react-helmet-async'
+
 export default function RefundPolicy() {
   return (
     <div className="page legal-page">
+      <Helmet>
+        <title>Refund Policy - SpotClause</title>
+        <meta name="description" content="SpotClause refund policy. Learn about our 7-day money-back guarantee." />
+        <link rel="canonical" href="https://spotclause.app/refund" />
+      </Helmet>
       <div className="legal-container">
         <h1>Refund Policy</h1>
         <p className="legal-updated">Last updated: May 14, 2025</p>

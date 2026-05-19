@@ -1,6 +1,13 @@
+import { Helmet } from 'react-helmet-async'
+
 export default function Privacy() {
   return (
     <div className="page legal-page">
+      <Helmet>
+        <title>Privacy Policy - SpotClause</title>
+        <meta name="description" content="SpotClause privacy policy. Learn how we protect your data and documents." />
+        <link rel="canonical" href="https://spotclause.app/privacy" />
+      </Helmet>
       <div className="legal-container">
         <h1>Privacy Policy</h1>
         <p className="legal-updated">Last updated: May 14, 2025</p>
