@@ -19,6 +19,7 @@ import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import RefundPolicy from './pages/RefundPolicy'
 import Disclaimer from './pages/Disclaimer'
+import ContractReadingGuide from './pages/ContractReadingGuide'
 import Admin from './pages/Admin'
 import ToastViewport from './components/Toast'
 import { authApi, api } from './lib/api'
@@ -266,6 +267,7 @@ function AppContent() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/refund" element={<RefundPolicy />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
+            <Route path="/contract-reading-guide" element={<ContractReadingGuide />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         ) : (
@@ -273,6 +275,7 @@ function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/compare" element={<Compare />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/contract-reading-guide" element={<ContractReadingGuide />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/refund" element={<RefundPolicy />} />

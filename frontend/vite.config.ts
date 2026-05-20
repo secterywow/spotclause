@@ -6,6 +6,7 @@ const PUBLIC_ROUTES = [
   '/',
   '/compare',
   '/pricing',
+  '/contract-reading-guide',
   '/privacy',
   '/terms',
   '/refund',

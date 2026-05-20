@@ -18,6 +18,7 @@ export default function Navbar({ onLoginClick, onRegisterClick }: NavbarProps) {
     { path: '/', label: t('nav.review') },
     { path: '/compare', label: t('nav.compare') },
     { path: '/pricing', label: t('nav.pricing') },
+    { path: '/contract-reading-guide', label: t('nav.guide') },
   ]
 
   return (
