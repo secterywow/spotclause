@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../hooks/useAuth'
+import { useToast } from '../hooks/useToast'
 import ThemeToggle from './ThemeToggle'
 import LanguageSwitcher from './LanguageSwitcher'
 import SubscriptionModal from './SubscriptionModal'
+import { feedbackApi } from '../lib/api'
 
 interface SidebarProps {
   onLogout: () => void
@@ -51,6 +53,12 @@ const LogoutIcon = () => (
   </svg>
 )
 
+const FeedbackIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+)
+
 const DiamondIcon = () => (
   <svg width="44" height="44" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="diamond-icon">
     <defs>
@@ -90,7 +98,11 @@ const DiamondIcon = () => (
 export default function Sidebar({ onLogout }: SidebarProps) {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const { showToast } = useToast()
   const [showSubModal, setShowSubModal] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedbackContent, setFeedbackContent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const isFree = user?.plan === 'free'
 
@@ -100,6 +112,24 @@ export default function Sidebar({ onLogout }: SidebarProps) {
     { path: '/contracts', label: t('nav.myContracts'), Icon: ContractsIcon },
     { path: '/settings', label: t('nav.settings'), Icon: SettingsIcon },
   ]
+
+  const handleSubmitFeedback = async () => {
+    if (!feedbackContent.trim()) {
+      showToast(t('feedback.emptyContent'), 'warning')
+      return
+    }
+    try {
+      setSubmitting(true)
+      await feedbackApi.submit(feedbackContent.trim())
+      showToast(t('feedback.submitSuccess'), 'success')
+      setFeedbackContent('')
+      setShowFeedback(false)
+    } catch (err: any) {
+      showToast(err.response?.data?.detail || t('feedback.submitFailed'), 'error')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <aside className="sidebar">
@@ -134,6 +164,10 @@ export default function Sidebar({ onLogout }: SidebarProps) {
             </button>
           </div>
         )}
+        <button className="feedback-btn" onClick={() => setShowFeedback(true)}>
+          <FeedbackIcon />
+          <span>{t('nav.feedback')}</span>
+        </button>
         <div className="sidebar-actions">
           <LanguageSwitcher />
           <div className="sidebar-actions-row">
@@ -151,6 +185,37 @@ export default function Sidebar({ onLogout }: SidebarProps) {
           reason={t('settings.upgradePrompt')}
           onClose={() => setShowSubModal(false)}
         />
+      )}
+
+      {/* Feedback Modal */}
+      {showFeedback && (
+        <div className="modal-overlay" onClick={() => setShowFeedback(false)}>
+          <div className="modal-content feedback-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{t('feedback.title')}</h2>
+              <button className="modal-close" onClick={() => setShowFeedback(false)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <p className="text-muted">{t('feedback.description')}</p>
+              <textarea
+                className="input feedback-textarea"
+                rows={5}
+                placeholder={t('feedback.placeholder')}
+                value={feedbackContent}
+                onChange={e => setFeedbackContent(e.target.value)}
+                maxLength={1000}
+              />
+              <div className="feedback-char-count">{feedbackContent.length}/1000</div>
+              <button
+                className="btn btn-primary"
+                onClick={handleSubmitFeedback}
+                disabled={submitting}
+              >
+                {submitting ? t('common.loading') : t('feedback.submit')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </aside>
   )

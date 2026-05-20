@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import auth, pricing, stripe, contract, follow_up, stats, admin, dodo
+from app.routers import auth, pricing, stripe, contract, follow_up, stats, admin, dodo, feedback
 from app.middleware.logging import LoggingMiddleware
 from app.logger import setup_logging
 from app.database import engine, Base
@@ -54,6 +54,7 @@ app.include_router(follow_up.router)
 app.include_router(stats.router)
 app.include_router(admin.router)
 app.include_router(dodo.router)
+app.include_router(feedback.router)
 
 
 @app.get("/health")

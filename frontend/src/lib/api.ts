@@ -55,3 +55,12 @@ export const authApi = {
   getGoogleConfig: () =>
     api.get('/api/auth/google-config'),
 }
+
+// Feedback API
+export const feedbackApi = {
+  submit: (content: string) =>
+    api.post('/api/feedback/', { content }),
+
+  list: () =>
+    api.get('/api/feedback/'),
+}

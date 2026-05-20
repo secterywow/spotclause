@@ -6,6 +6,7 @@ from app.models.payment import PendingPayment
 from app.models.rule import RiskRule
 from app.models.pricing import RegionalPricing
 from app.models.admin_log import LLMCallLog
+from app.models.feedback import Feedback
 
 __all__ = [
     "User",
@@ -17,4 +18,5 @@ __all__ = [
     "RiskRule",
     "RegionalPricing",
     "LLMCallLog",
+    "Feedback",
 ]

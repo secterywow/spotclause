@@ -5,7 +5,8 @@
     "pricing": "Pricing",
     "myContracts": "My Documents",
     "settings": "Settings",
-    "admin": "Admin"
+    "admin": "Admin",
+    "feedback": "Feedback"
   },
   "auth": {
     "login": "Log In",
@@ -349,6 +350,15 @@
     "contact": "Contact Us",
     "copyright": "© {{year}} SpotClause. All rights reserved.",
     "legalNotice": "SpotClause AI is a software tool. Results are generated automatically for informational purposes only."
+  },
+  "feedback": {
+    "title": "Send Feedback",
+    "description": "Found a bug or have a suggestion? Let us know.",
+    "placeholder": "Describe your issue or suggestion...",
+    "submit": "Submit Feedback",
+    "submitSuccess": "Thank you for your feedback!",
+    "submitFailed": "Failed to submit feedback. Please try again.",
+    "emptyContent": "Please enter your feedback"
   },
   "common": {
     "or": "or",

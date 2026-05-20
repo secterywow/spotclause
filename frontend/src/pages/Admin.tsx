@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../hooks/useAuth'
-import { api } from '../lib/api'
+import { api, feedbackApi } from '../lib/api'
 
 export default function Admin() {
   const { isAdmin, user } = useAuth()
-  const [tab, setTab] = useState<'dashboard' | 'users' | 'pricing' | 'rules'>('dashboard')
+  const [tab, setTab] = useState<'dashboard' | 'users' | 'pricing' | 'rules' | 'feedback'>('dashboard')
   const [data, setData] = useState<any>(null)
   const [users, setUsers] = useState<any[]>([])
   const [pricing, setPricing] = useState<any[]>([])
   const [rules, setRules] = useState<any[]>([])
+  const [feedbacks, setFeedbacks] = useState<any[]>([])
 
   const adminId = user?.id
 
@@ -18,6 +19,7 @@ export default function Admin() {
     loadUsers()
     loadPricing()
     loadRules()
+    loadFeedback()
   }, [isAdmin, adminId])
 
   const loadDashboard = async () => {
@@ -60,6 +62,15 @@ export default function Admin() {
     }
   }
 
+  const loadFeedback = async () => {
+    try {
+      const res = await feedbackApi.list()
+      setFeedbacks(res.data)
+    } catch (err) {
+      console.error('Failed to load feedback', err)
+    }
+  }
+
   const handleSeedRules = async () => {
     if (!adminId) return
     try {
@@ -89,6 +100,7 @@ export default function Admin() {
         <button className={`tab-btn ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>Users</button>
         <button className={`tab-btn ${tab === 'pricing' ? 'active' : ''}`} onClick={() => setTab('pricing')}>Pricing</button>
         <button className={`tab-btn ${tab === 'rules' ? 'active' : ''}`} onClick={() => setTab('rules')}>Rules</button>
+        <button className={`tab-btn ${tab === 'feedback' ? 'active' : ''}`} onClick={() => setTab('feedback')}>Feedback</button>
       </div>
 
       {tab === 'dashboard' && data && (
@@ -217,6 +229,38 @@ export default function Admin() {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {tab === 'feedback' && (
+        <div className="admin-feedback">
+          <h3>User Feedback ({feedbacks.length})</h3>
+          {feedbacks.length === 0 ? (
+            <p className="text-muted">No feedback yet.</p>
+          ) : (
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Content</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {feedbacks.map((f: any) => (
+                  <tr key={f.id}>
+                    <td>{f.id}</td>
+                    <td>{f.user_name || '-'}</td>
+                    <td>{f.user_email}</td>
+                    <td style={{ maxWidth: '400px', whiteSpace: 'pre-wrap' }}>{f.content}</td>
+                    <td>{new Date(f.created_at).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       )}
     </div>
