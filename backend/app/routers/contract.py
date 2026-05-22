@@ -28,8 +28,8 @@ router = APIRouter(prefix="/api/contracts", tags=["contracts"])
 
 _PLAN_LIMITS = {
     "free": {"analyze": 1, "compare": 1},
-    "standard": {"analyze": 10, "compare": 10},
-    "pro": {"analyze": 50, "compare": 50},
+    "standard": {"analyze": 20, "compare": 20},
+    "pro": {"analyze": 100, "compare": 100},
 }
 
 

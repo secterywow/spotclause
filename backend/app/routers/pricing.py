@@ -53,8 +53,8 @@ def detect_pricing(request: Request, db: Session = Depends(get_db)):
                 "price_monthly": float(pricing.standard_monthly),
                 "price_yearly": float(pricing.standard_yearly),
                 "features": {
-                    "analyze": "10 per month",
-                    "compare": "10 per month",
+                    "analyze": "20 per month",
+                    "compare": "20 per month",
                     "follow_up": True,
                     "export": True,
                     "negotiation": True,
@@ -68,8 +68,8 @@ def detect_pricing(request: Request, db: Session = Depends(get_db)):
                 "price_monthly": float(pricing.pro_monthly),
                 "price_yearly": float(pricing.pro_yearly),
                 "features": {
-                    "analyze": "50 per month",
-                    "compare": "50 per month",
+                    "analyze": "100 per month",
+                    "compare": "100 per month",
                     "follow_up": True,
                     "export": True,
                     "negotiation": True,
